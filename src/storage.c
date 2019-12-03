@@ -1,4 +1,7 @@
 #include <stdlib.h>
+#include <storage.h>
+#include <errno.h>
+#include <string.h>
 
 /*
  * Initialize a storage object.
@@ -9,7 +12,10 @@
  */
 struct storage *storage_init(const int size)
 {
-	return NULL;
+	struct storage *dev = malloc(sizeof(*dev));
+	dev->size = size;
+	dev->handler = malloc(size);
+	return dev;
 }
 
 /*
@@ -25,6 +31,10 @@ struct storage *storage_init(const int size)
  */
 int storage_read(const struct storage *dev, const int offset, const int size, void *buf)
 {
+	if (offset + size > dev->size) {
+		return ENOMEM;
+	}
+	memcpy(buf, dev->handler + offset, size);
 	return 0;
 }
 
@@ -41,5 +51,24 @@ int storage_read(const struct storage *dev, const int offset, const int size, vo
  */
 int storage_write(const struct storage *dev, const int offset, const int size, const void *buf)
 {
+	if (offset + size > dev->size) {
+		return ENOMEM;
+	}
+	memcpy(dev->handler + offset, buf, size);
+	return 0;
+}
+
+/*
+ * Destroy/Release the storage.
+ *
+ * @param dev: storage handler.
+ *
+ * @return 0 on success.
+ * @return -1 on failure.
+ */
+int storage_destroy(struct storage *dev)
+{
+	free(dev->handler);
+	free(dev);
 	return 0;
 }
