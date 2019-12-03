@@ -3,9 +3,10 @@ INCLUDES := include
 BIN_DIR := bin
 OBJ_DIR := obj
 SRC_DIR := src
+DATA_DIR := $(CURDIR)/data
 SRC_MAIN_DIR := $(SRC_DIR)/main
 DEPS = $(wildcard $(INCLUDES)/*.h)
-CFLAGS := -I$(INCLUDES) -Wall
+CFLAGS := -I$(INCLUDES) -Wall -DDATA_DIR='"$(DATA_DIR)"'
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 SRC_MAIN = $(wildcard $(SRC_MAIN_DIR)/*.c)
@@ -25,4 +26,4 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/*
+	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(DATA_DIR)/*

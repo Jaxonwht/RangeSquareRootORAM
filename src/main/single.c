@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 /*
  * Main function to run a single square-root ORAM
  *
