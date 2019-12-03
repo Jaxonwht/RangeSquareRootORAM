@@ -1,7 +1,7 @@
 /*
- * Main function to run a single square-root ORAM
+ * Main function to run a tree range ORAM
  *
- * @return 0 on sucess
+ * @return 0 on success
  * @return other numbers on failure
  */
 int main(int argc, char *argv[])
