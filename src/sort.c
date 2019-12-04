@@ -64,14 +64,15 @@ static void bitonicSort(const int lo, const int cnt, const enum dir dir, const s
  *				   < 0 if a < b,
  *				   0 if a == b,
  *				   > 0 if a > b.
+ * @param start_group: starting group index to be sorted.
+ * @param end_group: ending group index to be sorted.
  * 
  * @return 0 on success.
  * @return -1 on failure.
  */
-int oram_sort(const struct oram *oram, group_comparator compare)
+int oram_sort(const struct oram *oram, group_comparator compare, const int start_group, const int end_group)
 {
-    int N = oram->group_count;
-    bitonicSort(0, N, ASCENDING, oram, compare);
+    bitonicSort(start_group, end_group, ASCENDING, oram, compare);
 	return 0;
 }
 
@@ -83,11 +84,13 @@ int oram_sort(const struct oram *oram, group_comparator compare)
  *				   < 0 if a < b,
  *				   0 if a == b,
  *				   > 0 if a > b.
+ * @param start_group: starting group index to be sorted.
+ * @param end_group: ending group index to be sorted.
  * 
  * @return 0 on success.
  * @return -1 on failure.
  */
-int oram_sort_improved(const struct oram *oram, group_comparator compare)
+int oram_sort_improved(const struct oram *oram, group_comparator compare, const int start_group, const int end_group)
 {
 	return 0;
 }

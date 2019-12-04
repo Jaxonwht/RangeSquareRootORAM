@@ -57,8 +57,8 @@ struct range_oram *range_oram_init(const int blk_size, const int blk_count);
 
 int oram_access(const struct oram *oram, const int idx, const enum opcode, void *buffer);
 
-int oram_sort(const struct oram *oram, group_comparator compare);
-int oram_sort_improved(const struct oram *oram, group_comparator compare);
+int oram_sort(const struct oram *oram, group_comparator compare, const int start_group, const int end_group);
+int oram_sort_improved(const struct oram *oram, group_comparator compare, const int start_group, const int end_group);
 
 int range_oram_access(const struct range_oram *range_oram, const int idx, const int blk_range, const enum opcode, void *buffer);
 
