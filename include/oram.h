@@ -4,6 +4,7 @@
 #include <instruction.h>
 #include <string.h>
 #include <utils.h>
+#include <sha256.h>
 
 enum state {
 	old,
@@ -22,6 +23,7 @@ struct oram {
 	int group_count;
 	struct group_info *group_info;
 	struct storage *dev;
+	SHA256_CTX *sha_ctx;
 };
 
 struct range_oram {
