@@ -5,3 +5,4 @@ session.vim
 data
 test
 !src/test
+*.swp

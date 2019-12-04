@@ -152,9 +152,9 @@ struct instruction_arr *parse_instruction(const char *file_name)
 	while (fscanf(fp, "%s %d %d\n", op_buf, &idx, &size) == 3) {
 		struct instruction *const instruct = &arr_ptr->instruction[count++];
 		if (strncmp(op_buf, WRITE_STR, WRITE_STR_LEN) == 0) {
-			instruct->op = write;
+			instruct->op = WRITE;
 		} else if (strncmp(op_buf, READ_STR, READ_STR_LEN) == 0){
-			instruct->op = read;
+			instruct->op = READ;
 		} else {
 			count--;
 			continue;

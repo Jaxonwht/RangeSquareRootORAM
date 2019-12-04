@@ -2,8 +2,8 @@
 #define INSTRUCTION_H
 
 enum opcode {
-	write,
-	read
+	WRITE,
+	READ
 };
 
 struct instruction {
