@@ -1,16 +1,16 @@
-  
+
 /*********************************************************************
 * Filename:   sha256.c
-* Author:     Brad Conte (brad AT bradconte.com)
+* Author:	 Brad Conte (brad AT bradconte.com)
 * Copyright:
 * Disclaimer: This code is presented "as is" without any guarantees.
-* Details:    Implementation of the SHA-256 hashing algorithm.
-              SHA-256 is one of the three algorithms in the SHA2
-              specification. The others, SHA-384 and SHA-512, are not
-              offered in this implementation.
-              Algorithm specification can be found here:
-               * http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf
-              This implementation uses little endian byte order.
+* Details:	Implementation of the SHA-256 hashing algorithm.
+			  SHA-256 is one of the three algorithms in the SHA2
+			  specification. The others, SHA-384 and SHA-512, are not
+			  offered in this implementation.
+			  Algorithm specification can be found here:
+			   * http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf
+			  This implementation uses little endian byte order.
 *********************************************************************/
 
 /*************************** HEADER FILES ***************************/
@@ -147,7 +147,7 @@ void sha256_final(SHA256_CTX *ctx, BYTE hash[])
 	// Since this implementation uses little endian byte ordering and SHA uses big endian,
 	// reverse all the bytes when copying the final state to the output hash.
 	for (i = 0; i < 4; ++i) {
-		hash[i]      = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;
+		hash[i]	  = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;
 		hash[i + 4]  = (ctx->state[1] >> (24 - i * 8)) & 0x000000ff;
 		hash[i + 8]  = (ctx->state[2] >> (24 - i * 8)) & 0x000000ff;
 		hash[i + 12] = (ctx->state[3] >> (24 - i * 8)) & 0x000000ff;

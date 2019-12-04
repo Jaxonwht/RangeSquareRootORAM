@@ -5,6 +5,7 @@
 #include <string.h>
 #include <utils.h>
 #include <sha256.h>
+#include <stdint.h>
 
 enum state {
 	old,
@@ -14,7 +15,7 @@ enum state {
 struct group_info {
 	enum state state;
 	int idx;
-	void *hash_val;
+	uint8_t hash_val[HASH_LEN];
 };
 
 struct oram {
@@ -33,33 +34,22 @@ struct range_oram {
 	struct oram *oram_tree;
 };
 
-inline int compare_hash(struct group_info *a, struct group_info *b)
-{
-	return memcmp(a->hash_val, b->hash_val, HASH_LEN);
-}
 
-inline int compare_restore(struct group_info *a, struct group_info *b)
-{
-	if (a->state == old && b->state == updated && a->idx == b->idx) {
-		return 1;
-	}
-	if (a->state == updated && b->state == old && a->idx == b->idx) {
-		return -1;
-	}
-	return a->idx - b->idx;
-}
+int compare_hash(const struct group_info *a, const struct group_info *b);
+
+int compare_restore(const struct group_info *a, const struct group_info *b);
 
 typedef int (*group_comparator)(const struct group_info *a, const struct group_info *b);
 
-struct oram *oram_init(const int blk_size, const int group_size, const int group_count);
+struct oram *oram_init(int blk_size, int group_size, int group_count);
 
-struct range_oram *range_oram_init(const int blk_size, const int blk_count);
+struct range_oram *range_oram_init(int blk_size, int blk_count);
 
-int oram_access(const struct oram *oram, const int idx, const enum opcode, void *buffer);
+int oram_access(const struct oram *oram, int idx, const enum opcode, void *buffer);
 
-int oram_sort(const struct oram *oram, group_comparator compare, const int start_group, const int end_group);
-int oram_sort_improved(const struct oram *oram, group_comparator compare, const int start_group, const int end_group);
+int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group);
+int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group);
 
-int range_oram_access(const struct range_oram *range_oram, const int idx, const int blk_range, const enum opcode, void *buffer);
+int range_oram_access(const struct range_oram *range_oram, int idx, int blk_range, enum opcode, void *buffer);
 
 #endif
