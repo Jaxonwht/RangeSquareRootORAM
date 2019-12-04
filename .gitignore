@@ -3,3 +3,5 @@ obj
 compile_commands.json
 session.vim
 data
+test
+!src/test

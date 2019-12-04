@@ -9,7 +9,12 @@ enum opcode {
 struct instruction {
 	enum opcode op;
 	int idx;
-	int len;
+	int size;
+};
+
+struct instruction_arr {
+	int count;
+	struct instruction *instruction;
 };
 
 int mkdir_force(const char *dir_name);
@@ -22,6 +27,8 @@ int generate_seq(const char *file_name, const int num_access, const int range, c
 int generate_seq_read(const char *file_name, const int num_read, const int range, const int max_len);
 int generate_seq_write(const char *file_name, const int num_write, const int range, const int max_len);
 
-struct instruction *parse_instruction(const char *file_name);
+struct instruction_arr *parse_instruction(const char *file_name);
+
+int instruction_arr_free(struct instruction_arr *arr);
 
 #endif

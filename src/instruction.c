@@ -2,6 +2,8 @@
 #include <instruction.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * mkdir -p to create the data directory.
@@ -121,10 +123,60 @@ int generate_seq_write(const char *file_name, const int num_write, const int ran
  *
  * @param file_name: file name of the instruction file
  * 
- * @return a struct instruction * on success.
+ * @return a struct instruction_arr * on success.
  * @return NULL on failure.
  */
-struct instruction *parse_instruction(const char *file_name)
+struct instruction_arr *parse_instruction(const char *file_name)
 {
-	return NULL;
+	const char WRITE_STR[] = "write";
+	const char READ_STR[] = "read";
+	const int WRITE_STR_LEN = strlen(WRITE_STR);
+	const int READ_STR_LEN = strlen(READ_STR);
+	FILE *fp = fopen(file_name, "r");
+	struct instruction_arr *const arr_ptr = malloc(sizeof(*arr_ptr));
+	int count = 0;
+	char buf[WRITE_STR_LEN + 1];
+	while (fgets(buf, WRITE_STR_LEN + 1, fp) != NULL) {
+		if (strncmp(buf, WRITE_STR, WRITE_STR_LEN) == 0 || strncmp(buf, READ_STR, READ_STR_LEN) == 0) {
+			count++;
+		}
+	}
+	arr_ptr->count = count;
+	arr_ptr->instruction = malloc(count * sizeof(*arr_ptr->instruction));
+	fclose(fp);
+	fp = fopen(file_name, "r");
+	count = 0;
+	char op_buf[6];
+	int idx;
+	int size;
+	while (fscanf(fp, "%s %d %d\n", op_buf, &idx, &size) == 3) {
+		struct instruction *const instruct = &arr_ptr->instruction[count++];
+		if (strncmp(op_buf, WRITE_STR, WRITE_STR_LEN) == 0) {
+			instruct->op = write;
+		} else if (strncmp(op_buf, READ_STR, READ_STR_LEN) == 0){
+			instruct->op = read;
+		} else {
+			count--;
+			continue;
+		}
+		instruct->idx = idx;
+		instruct->size = size;
+	}
+	fclose(fp);
+	return arr_ptr;
+}
+
+/*
+ * Free the array of instructions.
+ *
+ * @param arr: array of instructions.
+ *
+ * @return 0 on success.
+ * @return -1 on failure.
+ */
+int instruction_arr_free(struct instruction_arr *arr)
+{
+	free(arr->instruction);
+	free(arr);
+	return 0;
 }

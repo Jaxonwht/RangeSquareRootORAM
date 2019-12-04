@@ -2,18 +2,32 @@ CC := gcc
 INCLUDES := include
 BIN_DIR := bin
 OBJ_DIR := obj
+TEST_DIR := test
 SRC_DIR := src
-DATA_DIR := $(CURDIR)/data
 SRC_MAIN_DIR := $(SRC_DIR)/main
+SRC_TEST_DIR := $(SRC_DIR)/test
 DEPS = $(wildcard $(INCLUDES)/*.h)
-CFLAGS := -I$(INCLUDES) -Wall -DDATA_DIR='"$(DATA_DIR)"'
+CFLAGS := -I$(INCLUDES) -Wall -g
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 SRC_MAIN = $(wildcard $(SRC_MAIN_DIR)/*.c)
 OBJ_MAIN = $(SRC_MAIN:$(SRC_MAIN_DIR)/%.c=$(OBJ_DIR)/%.o)
+SRC_TEST = $(wildcard $(SRC_TEST_DIR)/*.c)
+OBJ_TEST = $(SRC_TEST:$(SRC_TEST_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 .PHONY: all
-all: $(OBJ_MAIN)
+all: main test
+
+.PHONY: main
+main: $(OBJ_MAIN)
+
+.PHONY: test
+test: $(OBJ_TEST)
+
+$(OBJ_TEST): $(OBJ_DIR)/%.o: $(SRC_TEST_DIR)/%.c $(OBJ) $(DEPS)
+	mkdir -p $(TEST_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(OBJ) $@ -o $(@:$(OBJ_DIR)/%.o=$(TEST_DIR)/%)
 
 $(OBJ_MAIN): $(OBJ_DIR)/%.o: $(SRC_MAIN_DIR)/%.c $(OBJ) $(DEPS)
 	mkdir -p $(BIN_DIR)
@@ -26,4 +40,4 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(DATA_DIR)/*
+	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(TEST_DIR)/*
