@@ -10,7 +10,7 @@
  *
  * @return a handler of the storage device.
  */
-struct storage *storage_init(const int size)
+struct storage *storage_init(int size)
 {
 	struct storage *dev = malloc(sizeof(*dev));
 	dev->size = size;
@@ -29,7 +29,7 @@ struct storage *storage_init(const int size)
  * @return 0 on success.
  * @return other numbers on failure.
  */
-int storage_read(const struct storage *dev, const int offset, const int size, void *buf)
+int storage_read(const struct storage *dev, int offset, int size, void *buf)
 {
 	if (offset + size > dev->size) {
 		return ENOMEM;
@@ -49,7 +49,7 @@ int storage_read(const struct storage *dev, const int offset, const int size, vo
  * @return 0 on success.
  * @return other numbers on failure.
  */
-int storage_write(const struct storage *dev, const int offset, const int size, const void *buf)
+int storage_write(const struct storage *dev, int offset, int size, const void *buf)
 {
 	if (offset + size > dev->size) {
 		return ENOMEM;

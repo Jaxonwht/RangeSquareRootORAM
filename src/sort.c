@@ -13,7 +13,7 @@ enum dir {
 	DESCENDING
 };
 
-static void compareAndSwap(const int i, const int j, const enum dir dir, const struct oram *oram, group_comparator compare)
+static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, group_comparator compare)
 {
 	struct group_info info_i;
 	struct group_info info_j;
@@ -34,7 +34,7 @@ static void compareAndSwap(const int i, const int j, const enum dir dir, const s
 	}
 }
 
-static void bitonicMerge(const int lo, const int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
+static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
 {
 	if (cnt > 1) {
 		const int k = cnt >> 1;
@@ -46,7 +46,7 @@ static void bitonicMerge(const int lo, const int cnt, const enum dir dir, const 
 	}
 }
 
-static void bitonicSort(const int lo, const int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
+static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
 {
 	if (cnt > 1) {
 		const int k = cnt >> 2;
@@ -66,13 +66,13 @@ static void bitonicSort(const int lo, const int cnt, const enum dir dir, const s
  *				   > 0 if a > b.
  * @param start_group: starting group index to be sorted.
  * @param end_group: ending group index to be sorted.
- * 
+ *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int oram_sort(const struct oram *oram, group_comparator compare, const int start_group, const int end_group)
+int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group)
 {
-    bitonicSort(start_group, end_group, ASCENDING, oram, compare);
+	bitonicSort(start_group, end_group, ASCENDING, oram, compare);
 	return 0;
 }
 
@@ -86,11 +86,50 @@ int oram_sort(const struct oram *oram, group_comparator compare, const int start
  *				   > 0 if a > b.
  * @param start_group: starting group index to be sorted.
  * @param end_group: ending group index to be sorted.
- * 
+ *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int oram_sort_improved(const struct oram *oram, group_comparator compare, const int start_group, const int end_group)
+int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group)
 {
+	return 0;
+}
+
+/*
+ * Comparator that compares by hash_value byte by byte.
+ *
+ * @param a: group_info a.
+ * @param b: group_info b.
+ *
+ * @return < 0 if a < b,
+ *		   = 0 if a == b,
+ *		   > 0 if a > b.
+ */
+int compare_hash(const struct group_info *a, const struct group_info *b)
+{
+	return memcmp(a->hash_val, b->hash_val, HASH_LEN);
+}
+
+/*
+ * Comparator that compares by original index. If the two info have the same original index, compare their states.
+ *
+ * @param a: group_info a.
+ * @param b: group_info b.
+ *
+ * @return < 0 if a < b,
+ *		   = 0 if a == b,
+ *		   > 0 if a > b.
+ */
+int compare_restore(const struct group_info *a, const struct group_info *b)
+{
+	if (a->idx != b->idx) {
+		return a->idx - b->idx;
+	}
+	if (a->state == old && b->state == updated) {
+		return 1;
+	}
+	if (a->state == updated && b->state == old) {
+		return -1;
+	}
 	return 0;
 }

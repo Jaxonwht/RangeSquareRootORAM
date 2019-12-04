@@ -33,7 +33,7 @@ int mkdir_force(const char *dir_name)
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand(const char *file_name, const int num_access, const int range, const int max_len)
+int generate_rand(const char *file_name, int num_access, int range, int max_len)
 {
 	return 0;
 }
@@ -49,7 +49,7 @@ int generate_rand(const char *file_name, const int num_access, const int range, 
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand_read(const char *file_name, const int num_read, const int range, const int max_len)
+int generate_rand_read(const char *file_name, int num_read, int range, int max_len)
 {
 	return 0;
 }
@@ -65,7 +65,7 @@ int generate_rand_read(const char *file_name, const int num_read, const int rang
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand_write(const char *file_name, const int num_write, const int range, const int max_len)
+int generate_rand_write(const char *file_name, int num_write, int range, int max_len)
 {
 	return 0;
 }
@@ -81,7 +81,7 @@ int generate_rand_write(const char *file_name, const int num_write, const int ra
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq(const char *file_name, const int num_access, const int range, const int max_len)
+int generate_seq(const char *file_name, int num_access, int range, int max_len)
 {
 	return 0;
 }
@@ -97,7 +97,7 @@ int generate_seq(const char *file_name, const int num_access, const int range, c
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq_read(const char *file_name, const int num_read, const int range, const int max_len)
+int generate_seq_read(const char *file_name, int num_read, int range, int max_len)
 {
 	return 0;
 }
@@ -113,7 +113,7 @@ int generate_seq_read(const char *file_name, const int num_read, const int range
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq_write(const char *file_name, const int num_write, const int range, const int max_len)
+int generate_seq_write(const char *file_name, int num_write, int range, int max_len)
 {
 	return 0;
 }
@@ -122,7 +122,7 @@ int generate_seq_write(const char *file_name, const int num_write, const int ran
  * Generate an array of instructions from file.
  *
  * @param file_name: file name of the instruction file
- * 
+ *
  * @return a struct instruction_arr * on success.
  * @return NULL on failure.
  */

@@ -6,11 +6,11 @@ struct storage {
 	void *handler;
 };
 
-struct storage *storage_init(const int size);
+struct storage *storage_init(int size);
 
-int storage_read(const struct storage *dev, const int offset, const int size, void *buf);
+int storage_read(const struct storage *dev, int offset, int size, void *buf);
 
-int storage_write(const struct storage *dev, const int offset, const int size, const void *buf);
+int storage_write(const struct storage *dev, int offset, int size, const void *buf);
 
 int storage_destroy(struct storage *dev);
 
