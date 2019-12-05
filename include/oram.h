@@ -22,7 +22,6 @@ struct oram {
 	int blk_size;
 	int group_size;
 	int group_count;
-	struct group_info *group_info;
 	struct storage *dev;
 	SHA256_CTX *sha_ctx;
 };
