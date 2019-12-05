@@ -14,19 +14,19 @@ static int calculate_depth(int blk_count)
 {
 	bool carry = false;
 	int count = 0;
-    if (blk_count == 1) {
-        return 1;
-    }
-    while (blk_count > 0) {
-        if (blk_count & 1) {
-            carry = true;
-        }
-        count++;
-        blk_count >>= 1;
-    }
-    if (carry) {
-        count++;
-    }
+	if (blk_count == 1) {
+		return 1;
+	}
+	while (blk_count > 0) {
+		if (blk_count & 1) {
+			carry = true;
+		}
+		count++;
+		blk_count >>= 1;
+	}
+	if (carry) {
+		count++;
+	}
 	return count;
 }
 
@@ -41,7 +41,7 @@ static int calculate_depth(int blk_count)
 struct range_oram *range_oram_init(int blk_size, int blk_count)
 {
 	const int depth = calculate_depth(blk_count);
-	struct range_oram *const range_oram = malloc(sizeof(*range_oram) + depth);
+	struct range_oram *const range_oram = malloc(sizeof(*range_oram) + depth * sizeof(void *));
 	range_oram->blk_size = blk_size;
 	range_oram->blk_count = blk_count;
 	range_oram->depth = depth;

@@ -7,6 +7,7 @@ SRC_DIR := src
 SRC_MAIN_DIR := $(SRC_DIR)/main
 SRC_TEST_DIR := $(SRC_DIR)/test
 DEPS = $(wildcard $(INCLUDES)/*.h)
+LINKMATH := -lm
 CFLAGS := -I$(INCLUDES) -Wall -g
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -27,12 +28,12 @@ test: $(OBJ_TEST)
 $(OBJ_TEST): $(OBJ_DIR)/%.o: $(SRC_TEST_DIR)/%.c $(OBJ) $(DEPS)
 	mkdir -p $(TEST_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-	$(CC) $(CFLAGS) $(OBJ) $@ -o $(@:$(OBJ_DIR)/%.o=$(TEST_DIR)/%)
+	$(CC) $(CFLAGS) $(OBJ) $@ -o $(@:$(OBJ_DIR)/%.o=$(TEST_DIR)/%) $(LINKMATH)
 
 $(OBJ_MAIN): $(OBJ_DIR)/%.o: $(SRC_MAIN_DIR)/%.c $(OBJ) $(DEPS)
 	mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-	$(CC) $(CFLAGS) $(OBJ) $@ -o $(@:$(OBJ_DIR)/%.o=$(BIN_DIR)/%)
+	$(CC) $(CFLAGS) $(OBJ) $@ -o $(@:$(OBJ_DIR)/%.o=$(BIN_DIR)/%) $(LINKMATH)
 
 $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
 	mkdir -p $(OBJ_DIR)

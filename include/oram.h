@@ -23,7 +23,7 @@ struct oram {
 	int group_size;
 	int group_count;
 	struct storage *dev;
-	SHA256_CTX *sha_ctx;
+	SHA256_CTX sha_ctx[];
 };
 
 struct range_oram {
@@ -44,7 +44,7 @@ struct oram *oram_init(int blk_size, int group_size, int group_count);
 
 struct range_oram *range_oram_init(int blk_size, int blk_count);
 
-int oram_access(const struct oram *oram, int idx, const enum opcode, void *buffer);
+int oram_access(const struct oram *oram, int idx, enum opcode, void *buffer);
 
 int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group);
 int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group);

@@ -9,59 +9,52 @@
 #include <utils.h>
 #include "sha256.h"
 
+static void gen_random(uint8_t *s, int len) {
+	for (int i = 0; i < len; ++i) {
+		s[i] = rand() & 0xFF;
+	}
+}
 
 struct oram *oram_init(const int blk_size, const int group_size, const int group_count) {
 	const int group_total = group_size * blk_size;
-	struct storage dev = storage_init(total + 2(sqrt(total)));
-	
-	SHA256_CTX *ctx; 
-
-	sha256_init(ctx); 
-	uint8_t hash_val[HASH_LEN];
+	struct storage *dev = storage_init(group_total + sqrt(group_total));
+	struct oram *actual_oram = malloc(sizeof(struct oram) + sizeof(SHA256_CTX) * group_count);
 	for (int i = 0; i < group_count; i++) {
-		crypto_hash(i, &ctx, hash_val);
-		uint8_t buf1[sizeof(group_info)];
-		struct group_info g_info = (struct group_info)buf1;
-		g_info->state = state.old;
-		g_info->idx = i;
-		g_info->hash_val = hash_val;
-		storage_write(dev, i*(group_total + sizeof(group_info)), sizeof(group_info), buf1);
+		SHA256_CTX *const ctx = &actual_oram->sha_ctx[i];
+		sha256_init(ctx);
+		struct group_info g_info;
+		crypto_hash(i, ctx, g_info.hash_val);
+		g_info.state = old;
+		g_info.idx = i;
+		storage_write(dev, i * (group_total + sizeof(struct group_info)), sizeof(struct group_info), &g_info);
 
-		uint8_t buf2[blk_size * group_size];
-		gen_random(buf2, blk_size * group_size);
-		storage_write(dev, i*(group_total + sizeof(group_info)) + sizeof(group_info), buf2);
-
+		uint8_t buf2[group_total];
+		gen_random(buf2, group_total);
+		storage_write(dev, i * (group_total + sizeof(struct group_info)) + sizeof(struct group_info), group_total, buf2);
 	}
 
-	struct oram *actual_oram = malloc(sizeof(struct oram));
-	actual_oram -> blk_size = blk_size;
-	actual_oram -> group_size = group_size;
-	actual_oram -> group_count = group_count;
-	actual_oram -> dev = dev;
-	actual_oram -> sha_ctx = ctx;
+	actual_oram->blk_size = blk_size;
+	actual_oram->group_size = group_size;
+	actual_oram->group_count = group_count;
+	actual_oram->dev = dev;
 	return actual_oram;
 }
 
 
-int oram_access(const struct oram *oram, const int idx, const enum code, void *buffer) {
-	if (code.equals(opcode.read)) {
-		storage_read(oram->dev, idx*(oram->group_size * oram->blk_size + sizeof(group_info)), oram->group_size * oram->blk_size, &buffer);
+int oram_access(const struct oram *oram, int idx, enum opcode code, void *buffer) {
+	const int group_total = oram->group_size * oram->blk_size;
+	if (code == READ) {
+		storage_read(oram->dev, idx * (group_total + sizeof(struct group_info)), group_total, buffer);
 	}
-	if (code.equals(opcode.write)) {
-		storage_write(oram->dev, idx*(oram->group_size * oram->blk_size + sizeof(group_info)), oram->group_size * oram->blk_size, &buffer);
+	if (code == WRITE) {
+		storage_write(oram->dev, idx * (group_total + sizeof(struct group_info)), group_total, buffer);
 	}
+	return 0;
 }
 
-void gen_random(uint8_t *s, const int len) {
-    static const char alphanum[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    for (int i = 0; i < len; ++i) {
-        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
-    }
-
-    s[len] = 0;
+int oram_destroy(struct oram *oram)
+{
+	storage_destroy(oram->dev);
+	free(oram);
+	return 0;
 }
-
-
-
-
