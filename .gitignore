@@ -1,8 +1,10 @@
 bin
 obj
 compile_commands.json
-session.vim
+*.vim
+.clangd
 data
 test
 !src/test
 *.swp
+tags
