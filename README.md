@@ -12,7 +12,7 @@ The resulting binary files will be put in **bin/**
 
 ## Run
 
-To be continued..
+`./test_instruction.sh` to test instruction generation and testing functionalities. Detailed comments are in the shell file.
 
 ## Clean
 
