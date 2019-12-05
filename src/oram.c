@@ -16,7 +16,7 @@ struct oram *oram_init(const int blk_size, const int group_size, const int group
 	
 	SHA256_CTX *ctx; 
 
-	sha256_init(actual_oram -> sha_ctx); 
+	sha256_init(ctx); 
 	uint8_t hash_val[HASH_LEN];
 	for (int i = 0; i < group_count; i++) {
 		crypto_hash(i, &ctx, hash_val);
