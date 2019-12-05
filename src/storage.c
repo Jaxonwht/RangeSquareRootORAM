@@ -3,6 +3,11 @@
 #include <errno.h>
 #include <string.h>
 
+struct storage {
+	int size;
+	void *handler;
+};
+
 /*
  * Initialize a storage object.
  *
