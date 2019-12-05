@@ -31,7 +31,7 @@ struct range_oram {
 	int blk_size;
 	int blk_count;
 	int depth;
-	struct oram *oram_tree;
+	struct oram *oram_tree[];
 };
 
 
@@ -50,6 +50,9 @@ int oram_access(const struct oram *oram, int idx, const enum opcode, void *buffe
 int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group);
 int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group);
 
-int range_oram_access(const struct range_oram *range_oram, int idx, int blk_range, enum opcode, void *buffer);
+int range_oram_access(const struct range_oram *range_oram, int idx, int blk_range, enum opcode op, void *buffer);
+
+int oram_destroy(struct oram *oram);
+int range_oram_destroy(struct range_oram *range_oram);
 
 #endif
