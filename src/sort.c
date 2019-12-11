@@ -66,7 +66,7 @@ static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram 
 static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
 {
 	if (cnt > 1) {
-		const int k = cnt >> 2;
+		const int k = cnt >> 1;
 		bitonicSort(lo, k, ASCENDING, oram, compare);
 		bitonicSort(lo + k, k, DESCENDING, oram, compare);
 		bitonicMerge(lo, cnt, dir, oram, compare);
@@ -81,8 +81,8 @@ static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *
  *				   < 0 if a < b,
  *				   0 if a == b,
  *				   > 0 if a > b.
- * @param start_group: starting group index to be sorted.
- * @param end_group: ending group index to be sorted.
+ * @param start_group: starting group index to be sorted, inclusive.
+ * @param end_group: ending group index to be sorted, exclusive.
  *
  * @return 0 on success.
  * @return -1 on failure.

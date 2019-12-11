@@ -5,7 +5,7 @@ enum dir {
 	DESCENDING
 };
 
-int test[8] = {1, 19, 10,5, 8, 17, 9, 6};
+int test[] = {1, 19, 10, 5, 8, 17, 9, 6, 6, 1, 3, 2, 10, 0, 0, 7};
 
 static void compareAndSwap_test(int i, int j, enum dir dir)
 {
@@ -21,7 +21,7 @@ static void compareAndSwap_test(int i, int j, enum dir dir)
 static void bitonicMerge_test(int lo, int cnt, const enum dir dir)
 {
 	if (cnt > 1) {
-		const int k = cnt / 2;
+		const int k = (cnt >> 1);
 		for (int i= lo; i < lo + k; i++) {
 			compareAndSwap_test(i, i + k, dir);
 		}
@@ -33,7 +33,7 @@ static void bitonicMerge_test(int lo, int cnt, const enum dir dir)
 static void bitonicSort_test(int lo, int cnt, const enum dir dir)
 {
 	if (cnt > 1) {
-		const int k = cnt / 2;
+		const int k = (cnt >> 1);
 		bitonicSort_test(lo, k, ASCENDING);
 		bitonicSort_test(lo + k, k, DESCENDING);
 		bitonicMerge_test(lo, cnt, dir);
@@ -43,13 +43,14 @@ static void bitonicSort_test(int lo, int cnt, const enum dir dir)
 
 static int oram_sort_test()
 {
-	for (int q = 0; q < 8; q++){
+	const int size = sizeof(test) / sizeof(test[0]);
+	for (int q = 0; q < size; q++){
 		printf("%d ", test[q]);
 	}
 	printf("\n");
-	bitonicSort_test(0, 7, ASCENDING);
+	bitonicSort_test(0, size, ASCENDING);
 
-	for (int q = 0; q < 8; q++){
+	for (int q = 0; q < size; q++){
 		printf("%d ", test[q]);
 	}
 	printf("\n");
