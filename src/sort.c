@@ -17,21 +17,37 @@ static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, 
 {
 	struct group_info info_i;
 	struct group_info info_j;
+
 	const int group_size = oram->group_size;
 	const int blk_size = oram->blk_size;
+
+	uint8_t data_i[blk_size * group_size];
+	uint8_t data_j[blk_size * group_size];
+
 	const int myconst = group_size * blk_size + sizeof(struct group_info);
 	uint8_t buf[sizeof(struct group_info)];
 	storage_read(oram->dev, i * myconst, sizeof(struct group_info), buf);
 	decrypt(buf, sizeof(struct group_info), &info_i);
 	storage_read(oram->dev, j * myconst, sizeof(struct group_info), buf);
 	decrypt(buf, sizeof(struct group_info), &info_j);
-	const int compare_res = compare(&info_i, &info_j);
-	if ((dir == ASCENDING && compare_res > 0) || (dir == DESCENDING && compare_res <= 0)) {
-		encrypt(&info_j, sizeof(struct group_info), buf);
-		storage_write(oram->dev, i * myconst, sizeof(struct group_info), buf);
-		encrypt(&info_i, sizeof(struct group_info), buf);
-		storage_write(oram->dev, j * myconst, sizeof(struct group_info), buf);
-	}
+
+	storage_read(oram->dev, i * myconst + sizeof(struct group_info), blk_size * group_size, buf);
+    decrypt(buf, sizeof(struct group_info), &data_i);
+    storage_read(oram->dev, j * myconst + sizeof(struct group_info), blk_size * group_size, buf);
+    decrypt(buf, sizeof(struct group_info), &data_j);
+
+    const int compare_res = compare(&info_i, &info_j);
+    if ((dir == ASCENDING && compare_res > 0) || (dir == DESCENDING && compare_res <= 0)) {
+    	encrypt(&info_j, sizeof(struct group_info), buf);
+    	storage_write(oram->dev, i * myconst, sizeof(struct group_info), buf);
+    	encrypt(&info_i, sizeof(struct group_info), buf);
+    	storage_write(oram->dev, j * myconst, sizeof(struct group_info), buf);
+
+    	encrypt(&data_j, blk_size * group_size, buf);
+        storage_write(oram->dev, i * myconst + sizeof(struct group_info), blk_size* group_size, buf);
+        encrypt(&data_i, blk_size * group_size, buf);
+        storage_write(oram->dev, j * myconst + sizeof(struct group_info), blk_size* group_size, buf);
+        }
 }
 
 static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
