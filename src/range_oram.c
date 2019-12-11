@@ -1,3 +1,4 @@
+#include "instruction.h"
 #include <oram.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -51,7 +52,7 @@ struct range_oram *range_oram_init(int blk_size, int blk_count)
 	return range_oram;
 }
 
-/* Access a block in the range ORAM.
+/* Access a block in the range ORAM. Currently only supports READ operation.
  *
  * @param range_oram: ptr to the range_oram handler.
  * @param idx: index of the starting block to be accessed.
@@ -63,6 +64,10 @@ struct range_oram *range_oram_init(int blk_size, int blk_count)
  */
 int range_oram_access(const struct range_oram *range_oram, int idx, int blk_range, enum opcode op, void *buffer)
 {
+	/* Range oram does not support write operations */
+	if (op == WRITE) {
+		return -1;
+	}
 	if (idx + blk_range > range_oram->blk_count) {
 		return ENOMEM;
 	}
@@ -70,20 +75,22 @@ int range_oram_access(const struct range_oram *range_oram, int idx, int blk_rang
 	const struct oram *const oram_active = range_oram->oram_tree[depth - 1];
 	const int group_size = oram_active->group_size;
 	const int blk_size = range_oram->blk_size;
+	const int group_size_byte = group_size * blk_size;
 	const int quotient_first = idx / group_size;
 	const int remainder_first = idx % group_size;
 	const int quotient_last = (idx + blk_range - 1) / group_size;
 	const int remainder_last = (idx + blk_range - 1) % group_size;
+	const int padding = remainder_first * blk_size;
 	if (quotient_first == quotient_last) {
-		uint8_t tmp_buf[blk_size * group_size];
+		uint8_t tmp_buf[group_size_byte];
 		oram_access(oram_active, quotient_first, op, tmp_buf);
-		memcpy(buffer, tmp_buf + remainder_first, blk_range * blk_size);
+		memcpy(buffer, tmp_buf + padding, blk_range * blk_size);
 	} else {
-		uint8_t tmp_buf[blk_size * group_size];
+		uint8_t tmp_buf[group_size_byte];
 		oram_access(oram_active, quotient_first, op, tmp_buf);
-		memcpy(buffer, tmp_buf + remainder_first, (group_size - remainder_first) * blk_size);
+		memcpy(buffer, tmp_buf + padding, group_size_byte - padding);
 		oram_access(oram_active, quotient_last, op, tmp_buf);
-		memcpy(buffer, tmp_buf, (remainder_last + 1) * blk_size);
+		memcpy(buffer + group_size_byte - padding, tmp_buf, (remainder_last + 1) * blk_size);
 	}
 	return 0;
 }
