@@ -28,25 +28,25 @@ static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, 
 	const int myconst = group_size * blk_size + sizeof(struct group_info);
 	uint8_t buf[sizeof(struct group_info)];
 	storage_read(oram->dev, i * myconst, sizeof(struct group_info), buf);
-	decrypt(buf, sizeof(struct group_info), &info_i);
+	oram_decrypt(buf, sizeof(struct group_info), &info_i);
 	storage_read(oram->dev, j * myconst, sizeof(struct group_info), buf);
-	decrypt(buf, sizeof(struct group_info), &info_j);
+	oram_decrypt(buf, sizeof(struct group_info), &info_j);
 
 	storage_read(oram->dev, i * myconst + sizeof(struct group_info), blk_size * group_size, buf);
-	decrypt(buf, sizeof(struct group_info), &data_i);
+	oram_decrypt(buf, sizeof(struct group_info), &data_i);
 	storage_read(oram->dev, j * myconst + sizeof(struct group_info), blk_size * group_size, buf);
-	decrypt(buf, sizeof(struct group_info), &data_j);
+	oram_decrypt(buf, sizeof(struct group_info), &data_j);
 
 	const int compare_res = compare(&info_i, &info_j);
 	if ((dir == ASCENDING && compare_res > 0) || (dir == DESCENDING && compare_res <= 0)) {
-		encrypt(&info_j, sizeof(struct group_info), buf);
+		oram_encrypt(&info_j, sizeof(struct group_info), buf);
 		storage_write(oram->dev, i * myconst, sizeof(struct group_info), buf);
-		encrypt(&info_i, sizeof(struct group_info), buf);
+		oram_encrypt(&info_i, sizeof(struct group_info), buf);
 		storage_write(oram->dev, j * myconst, sizeof(struct group_info), buf);
 
-		encrypt(&data_j, blk_size * group_size, buf);
+		oram_encrypt(&data_j, blk_size * group_size, buf);
 		storage_write(oram->dev, i * myconst + sizeof(struct group_info), blk_size* group_size, buf);
-		encrypt(&data_i, blk_size * group_size, buf);
+		oram_encrypt(&data_i, blk_size * group_size, buf);
 		storage_write(oram->dev, j * myconst + sizeof(struct group_info), blk_size* group_size, buf);
 	}
 }

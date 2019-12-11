@@ -14,7 +14,7 @@
  * @return 0 on success.
  * @return other numbers on failure.
  */
-int encrypt(const void *data, int size, void *buf)
+int oram_encrypt(const void *data, int size, void *buf)
 {
 	memcpy(buf, data, size);
 	return 0;
@@ -30,7 +30,7 @@ int encrypt(const void *data, int size, void *buf)
  * @return 0.
  * @return other numbers on failure.
  */
-int decrypt(const void *data, int size, void *buf)
+int oram_decrypt(const void *data, int size, void *buf)
 {
 	memcpy(buf, data, size);
 	return 0;
