@@ -119,9 +119,9 @@ int storage_write(const struct storage *dev, int offset, int size, const void *b
  */
 int storage_destroy(struct storage *dev)
 {
-	remove(dev->file_name);
-	free(dev->file_name);
 	fclose(dev->fp);
+	free(dev->file_name);
+	remove(dev->file_name);
 	free(dev);
 	return 0;
 }
