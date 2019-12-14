@@ -1,6 +1,7 @@
 #include <oram.h>
 #include <utils.h>
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -17,20 +18,36 @@ static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, 
 {
 	struct group_info info_i;
 	struct group_info info_j;
+
 	const int group_size = oram->group_size;
 	const int blk_size = oram->blk_size;
+
+	uint8_t data_i[blk_size * group_size];
+	uint8_t data_j[blk_size * group_size];
+
 	const int myconst = group_size * blk_size + sizeof(struct group_info);
 	uint8_t buf[sizeof(struct group_info)];
 	storage_read(oram->dev, i * myconst, sizeof(struct group_info), buf);
-	decrypt(buf, sizeof(struct group_info), &info_i);
+	oram_decrypt(buf, sizeof(struct group_info), &info_i);
 	storage_read(oram->dev, j * myconst, sizeof(struct group_info), buf);
-	decrypt(buf, sizeof(struct group_info), &info_j);
+	oram_decrypt(buf, sizeof(struct group_info), &info_j);
+
+	storage_read(oram->dev, i * myconst + sizeof(struct group_info), blk_size * group_size, buf);
+	oram_decrypt(buf, sizeof(struct group_info), &data_i);
+	storage_read(oram->dev, j * myconst + sizeof(struct group_info), blk_size * group_size, buf);
+	oram_decrypt(buf, sizeof(struct group_info), &data_j);
+
 	const int compare_res = compare(&info_i, &info_j);
 	if ((dir == ASCENDING && compare_res > 0) || (dir == DESCENDING && compare_res <= 0)) {
-		encrypt(&info_j, sizeof(struct group_info), buf);
+		oram_encrypt(&info_j, sizeof(struct group_info), buf);
 		storage_write(oram->dev, i * myconst, sizeof(struct group_info), buf);
-		encrypt(&info_i, sizeof(struct group_info), buf);
+		oram_encrypt(&info_i, sizeof(struct group_info), buf);
 		storage_write(oram->dev, j * myconst, sizeof(struct group_info), buf);
+
+		oram_encrypt(&data_j, blk_size * group_size, buf);
+		storage_write(oram->dev, i * myconst + sizeof(struct group_info), blk_size* group_size, buf);
+		oram_encrypt(&data_i, blk_size * group_size, buf);
+		storage_write(oram->dev, j * myconst + sizeof(struct group_info), blk_size* group_size, buf);
 	}
 }
 
@@ -49,7 +66,7 @@ static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram 
 static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
 {
 	if (cnt > 1) {
-		const int k = cnt >> 2;
+		const int k = cnt >> 1;
 		bitonicSort(lo, k, ASCENDING, oram, compare);
 		bitonicSort(lo + k, k, DESCENDING, oram, compare);
 		bitonicMerge(lo, cnt, dir, oram, compare);
@@ -64,8 +81,8 @@ static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *
  *				   < 0 if a < b,
  *				   0 if a == b,
  *				   > 0 if a > b.
- * @param start_group: starting group index to be sorted.
- * @param end_group: ending group index to be sorted.
+ * @param start_group: starting group index to be sorted, inclusive.
+ * @param end_group: ending group index to be sorted, exclusive.
  *
  * @return 0 on success.
  * @return -1 on failure.

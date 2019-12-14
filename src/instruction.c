@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <instruction.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,23 +16,6 @@
 static int get_rand(int low, int high)
 {
 	return low + rand() % (high - low);
-}
-
-/*
- * mkdir -p to create the data directory.
- *
- * @return 0 on success.
- * @return -1 on failure.
- */
-int mkdir_force(const char *dir_name)
-{
-	int ret = mkdir(dir_name, 0755);
-	if (ret != 0 && ret != EEXIST){
-		return -1;
-	}
-	else{
-		return 0;
-	}
 }
 
 /*

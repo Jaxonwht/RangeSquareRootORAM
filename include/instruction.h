@@ -14,8 +14,6 @@ struct instruction {
 	struct instruction *next;
 };
 
-int mkdir_force(const char *dir_name);
-
 int generate_rand(const char *file_name, int num_access, int range, int max_len, int blk_size);
 int generate_rand_read(const char *file_name, int num_read, int range, int max_len);
 int generate_rand_write(const char *file_name, int num_write, int range, int max_len, int blk_size);

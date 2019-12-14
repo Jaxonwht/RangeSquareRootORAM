@@ -15,9 +15,9 @@ static void gen_random(uint8_t *s, int len) {
 	}
 }
 
-struct oram *oram_init(const int blk_size, const int group_size, const int group_count) {
+struct oram *oram_init(const int blk_size, const int group_size, const int group_count, const char *storage_file) {
 	const int group_total = group_size * blk_size;
-	struct storage *dev = storage_init(group_total + sqrt(group_total));
+	struct storage *dev = storage_init(group_total + sqrt(group_total), storage_file);
 	struct oram *actual_oram = malloc(sizeof(struct oram) + sizeof(SHA256_CTX) * group_count);
 	for (int i = 0; i < group_count; i++) {
 		SHA256_CTX *const ctx = &actual_oram->sha_ctx[i];

@@ -1,5 +1,6 @@
 CC := gcc
 INCLUDES := include
+STORAGE_DIR := data/storage
 BIN_DIR := bin
 OBJ_DIR := obj
 TEST_DIR := test
@@ -41,4 +42,4 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(TEST_DIR)/*
+	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(TEST_DIR)/* $(STORAGE_DIR)/*
