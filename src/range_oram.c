@@ -1,11 +1,24 @@
 #include "instruction.h"
+#include <stdio.h>
 #include <oram.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <libgen.h>
+#include <stdio.h>
+
+struct range_oram {
+	int blk_size;
+	int blk_count;
+	int depth;
+	struct oram *oram_tree[];
+};
 
 /*
  * Calculate the number of ORAMs needed. One oram for each depth.
+ * 1 -> 1
+ * 2 -> 2
+ * 3-4 -> 3
  *
  * @param blk_count: total number of blocks
  *
@@ -32,22 +45,61 @@ static int calculate_depth(int blk_count)
 }
 
 /*
+ * Calculate the index of the ORAM to access for a contiguous group of blk_count blocks.
+ * 1 -> 0
+ * 2 -> 1
+ * 3-4 -> 2
+ * 5-8 -> 3
+ *
+ * @param blk_count: number of contiguous blocks accessed.
+ *
+ * @return index of the accessed oram.
+ */
+static int active_oram_idx(int blk_count)
+{
+	bool carry = false;
+	int count = -1;
+	if (blk_count == 1) {
+		return 0;
+	}
+	while (blk_count > 0) {
+		if (blk_count & 1) {
+			carry = true;
+		}
+		count++;
+		blk_count >>= 1;
+	}
+	if (carry) {
+		count++;
+	}
+	return count;
+
+}
+
+/*
  * Initialize a tree-based read only range ORAM based on the square-root ORAM implemented for oram.h.
  *
  * @param blk_size: size of a block is bytes.
  * @param blk_count: total number of blocks.
+ * @param storage_folder: path to the storage folder.
  *
  * @return pointer to the initialized range_oram.
  */
-struct range_oram *range_oram_init(int blk_size, int blk_count)
+struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder)
 {
+	mkdir_force(storage_folder);
+	char buf[strlen(storage_folder) + 1];
+	strcpy(buf, storage_folder);
+	const char *foldername = dirname(buf);
 	const int depth = calculate_depth(blk_count);
 	struct range_oram *const range_oram = malloc(sizeof(*range_oram) + depth * sizeof(void *));
 	range_oram->blk_size = blk_size;
 	range_oram->blk_count = blk_count;
 	range_oram->depth = depth;
+	char path_buf[255];
 	for (int i = 0; i < depth; i++) {
-		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i));
+		sprintf(path_buf, "%s/%09d.img", foldername, i);
+		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf);
 	}
 	return range_oram;
 }
@@ -71,8 +123,8 @@ int range_oram_access(const struct range_oram *range_oram, int idx, int blk_rang
 	if (idx + blk_range > range_oram->blk_count) {
 		return ENOMEM;
 	}
-	const int depth = calculate_depth(blk_range);
-	const struct oram *const oram_active = range_oram->oram_tree[depth - 1];
+	const int active_idx = active_oram_idx(blk_range);
+	const struct oram *const oram_active = range_oram->oram_tree[active_idx];
 	const int group_size = oram_active->group_size;
 	const int blk_size = range_oram->blk_size;
 	const int group_size_byte = group_size * blk_size;

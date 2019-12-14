@@ -26,13 +26,7 @@ struct oram {
 	SHA256_CTX sha_ctx[];
 };
 
-struct range_oram {
-	int blk_size;
-	int blk_count;
-	int depth;
-	struct oram *oram_tree[];
-};
-
+struct range_oram;
 
 int compare_hash(const struct group_info *a, const struct group_info *b);
 
@@ -40,9 +34,9 @@ int compare_restore(const struct group_info *a, const struct group_info *b);
 
 typedef int (*group_comparator)(const struct group_info *a, const struct group_info *b);
 
-struct oram *oram_init(int blk_size, int group_size, int group_count);
+struct oram *oram_init(int blk_size, int group_size, int group_count, const char *storage_file);
 
-struct range_oram *range_oram_init(int blk_size, int blk_count);
+struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder);
 
 int oram_access(const struct oram *oram, int idx, enum opcode, void *buffer);
 

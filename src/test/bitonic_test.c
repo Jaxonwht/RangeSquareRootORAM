@@ -59,6 +59,6 @@ static int oram_sort_test()
 
 int main(void)
 {
-	oram_sort_test();	
+	oram_sort_test();
 	return 0;
 }
