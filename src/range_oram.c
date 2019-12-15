@@ -124,7 +124,7 @@ int range_oram_access(const struct range_oram *range_oram, int idx, int blk_rang
 		return ENOMEM;
 	}
 	const int active_idx = active_oram_idx(blk_range);
-	const struct oram *const oram_active = range_oram->oram_tree[active_idx];
+	struct oram *const oram_active = range_oram->oram_tree[active_idx];
 	const int group_size = oram_active->group_size;
 	const int blk_size = range_oram->blk_size;
 	const int group_size_byte = group_size * blk_size;

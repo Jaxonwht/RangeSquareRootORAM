@@ -40,7 +40,7 @@ struct oram *oram_init(int blk_size, int group_size, int group_count, const char
 
 struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder);
 
-int oram_access(const struct oram *oram, int idx, enum opcode, void *buffer);
+int oram_access(struct oram *oram, int idx, enum opcode, void *buffer);
 
 int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group);
 int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group);
