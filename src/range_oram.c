@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <libgen.h>
 #include <stdio.h>
+#include <string.h>
 
 struct range_oram {
 	int blk_size;
@@ -90,15 +91,17 @@ struct range_oram *range_oram_init(int blk_size, int blk_count, const char *stor
 	mkdir_force(storage_folder);
 	char buf[strlen(storage_folder) + 1];
 	strcpy(buf, storage_folder);
-	const char *foldername = dirname(buf);
+	if (buf[strlen(storage_folder) - 1] == '/') {
+		buf[strlen(storage_folder) - 1] = '\0';
+	}
 	const int depth = calculate_depth(blk_count);
-	struct range_oram *const range_oram = malloc(sizeof(*range_oram) + depth * sizeof(void *));
+	struct range_oram *const range_oram = malloc(sizeof(*range_oram) + depth * sizeof(struct oram *));
 	range_oram->blk_size = blk_size;
 	range_oram->blk_count = blk_count;
 	range_oram->depth = depth;
 	char path_buf[255];
 	for (int i = 0; i < depth; i++) {
-		sprintf(path_buf, "%s/%09d.img", foldername, i);
+		sprintf(path_buf, "%s/%09d.img", buf, i);
 		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf);
 	}
 	return range_oram;

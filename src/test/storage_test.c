@@ -2,6 +2,8 @@
 #include <libgen.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <oram.h>
+#include <math.h>
 
 /*
  * Run storage tests.
@@ -13,7 +15,8 @@ int main(int argc, char *argv[])
 		printf("test/storage_test filename to start the test.\n");
 		return 1;
 	}
-	const struct storage *const dev = storage_init(40, argv[1]);
+	/*
+	struct storage *const dev = storage_init(40, argv[1]);
 	uint8_t buf[40];
 	storage_read(dev, 0, 40, buf);
 	hex_dump(buf, 10);
@@ -22,5 +25,9 @@ int main(int argc, char *argv[])
 	storage_write(dev, 3, 10, rand_buf);
 	storage_read(dev, 0, 13, buf);
 	hex_dump(buf, 13);
+	storage_destroy(dev);
+	*/
+	struct range_oram *range_oram = range_oram_init(10, 10, argv[1]);
+	range_oram_destroy(range_oram);
 	return 0;
 }

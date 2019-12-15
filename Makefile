@@ -43,3 +43,7 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
 .PHONY: clean
 clean:
 	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(TEST_DIR)/* $(STORAGE_DIR)/*
+
+.PHONY: storage_clean
+storage_clean:
+	rm -rf $(STORAGE_DIR)/*
