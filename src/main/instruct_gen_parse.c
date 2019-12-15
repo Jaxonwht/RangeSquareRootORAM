@@ -15,8 +15,8 @@
 int main(int argc, char *argv[])
 {
 	if (argc != 3 && argc != 9) {
-		printf("Call the binary as ./instruction_test parse filename\n");
-		printf("Or... ./instruction_parse generate <num_access> <blk_size> <blk_count> <max_range> <r | w | rw> <rand | seq> filename\n");
+		printf("Call the binary as ./instruction_gen_parse parse filename\n");
+		printf("Or... ./instruction_gen_parse generate <num_access> <blk_size> <blk_count> <max_range> <r | w | rw> <rand | seq> filename\n");
 		return 1;
 	}
 	if (!strcmp(argv[1], "parse")) {
@@ -51,16 +51,28 @@ int main(int argc, char *argv[])
 				generate_rand(argv[8], num_access, blk_count, max_range, blk_size);
 				return 0;
 			}
+			if (!strcmp(argv[7], "seq")) {
+				generate_seq(argv[8], blk_count, max_range, blk_size);
+				return 0;
+			}
 		}
 		if (!strcmp(argv[6], "r")) {
 			if (!strcmp(argv[7], "rand")) {
 				generate_rand_read(argv[8], num_access, blk_count, max_range);
 				return 0;
 			}
+			if (!strcmp(argv[7], "seq")) {
+				generate_seq_read(argv[8], blk_count, max_range);
+				return 0;
+			}
 		}
 		if (!strcmp(argv[6], "w")) {
 			if (!strcmp(argv[7], "rand")) {
 				generate_rand_write(argv[8], num_access, blk_count, max_range, blk_size);
+				return 0;
+			}
+			if (!strcmp(argv[7], "seq")) {
+				generate_seq_write(argv[8], blk_count, max_range, blk_size);
 				return 0;
 			}
 		}

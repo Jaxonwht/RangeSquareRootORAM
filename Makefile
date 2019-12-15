@@ -1,6 +1,7 @@
 CC := gcc
 INCLUDES := include
 STORAGE_DIR := data/storage
+INSTRUCTION_DIR := data/instruction
 BIN_DIR := bin
 OBJ_DIR := obj
 TEST_DIR := test
@@ -47,3 +48,7 @@ clean:
 .PHONY: storage_clean
 storage_clean:
 	rm -rf $(STORAGE_DIR)/*
+
+.PHONY: instruction_clean
+instruction_clean:
+	rm -rf $(INSTRUCTION_DIR)/*
