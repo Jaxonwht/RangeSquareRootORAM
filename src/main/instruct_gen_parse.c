@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 	}
 	if (!strcmp(argv[1], "parse")) {
 		int blk_size;
-		struct instruction *instruct_arr = parse_instruction(argv[2], &blk_size);
+		int blk_count;
+		struct instruction *instruct_arr = parse_instruction(argv[2], &blk_size, &blk_count);
+		printf("block size is %d bytes, block count is %d\n", blk_size, blk_count);
 		struct instruction *instruct = instruct_arr;
 		while (instruct != NULL) {
 			printf("op is %s, idx is %d, size is %d\n", instruct->op == READ ? "read" : "write", instruct->idx, instruct->size);

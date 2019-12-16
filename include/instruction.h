@@ -22,7 +22,7 @@ int generate_seq(const char *file_name, int range, int max_len, int blk_size);
 int generate_seq_read(const char *file_name, int range, int max_len);
 int generate_seq_write(const char *file_name, int range, int max_len, int blk_size);
 
-struct instruction *parse_instruction(const char *file_name, int *blk_size);
+struct instruction *parse_instruction(const char *file_name, int *blk_size, int *blk_count);
 
 int instruction_free(struct instruction *instruct);
 
