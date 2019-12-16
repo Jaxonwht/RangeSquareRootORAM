@@ -27,22 +27,16 @@ struct range_oram {
  */
 static int calculate_depth(int blk_count)
 {
-	bool carry = false;
+	int carry = 0;
 	int count = 0;
-	if (blk_count == 1) {
-		return 1;
-	}
 	while (blk_count > 0) {
-		if (blk_count & 1) {
-			carry = true;
+		if ((blk_count & 1) && (blk_count != 1)) {
+			carry = 1;
 		}
 		count++;
 		blk_count >>= 1;
 	}
-	if (carry) {
-		count++;
-	}
-	return count;
+	return count + carry;
 }
 
 /*
@@ -58,23 +52,16 @@ static int calculate_depth(int blk_count)
  */
 static int active_oram_idx(int blk_count)
 {
-	bool carry = false;
+	int carry = 0;
 	int count = -1;
-	if (blk_count == 1) {
-		return 0;
-	}
 	while (blk_count > 0) {
-		if (blk_count & 1) {
-			carry = true;
+		if ((blk_count & 1) && (blk_count != 1)) {
+			carry = 1;
 		}
 		count++;
 		blk_count >>= 1;
 	}
-	if (carry) {
-		count++;
-	}
-	return count;
-
+	return count + carry;
 }
 
 /*

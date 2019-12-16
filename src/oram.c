@@ -15,10 +15,25 @@ static void gen_random(uint8_t *s, int len) {
 	}
 }
 
+static int two_power_ceiling(int n) {
+	int count = -1;
+	int carry = 0;
+	while (n > 0) {
+		if ((n & 1) && (n != 1)) {
+			carry = 1;
+		}
+		n >>= 1;
+		count++;
+	}
+	return 1 << (count + carry);
+}
+
 struct oram *oram_init(const int blk_size, const int group_size, const int group_count, const char *storage_file) {
 	const int count_sqrt = (int)sqrt(group_count);
 	const int group_total = group_size * blk_size;
-	struct storage *dev = storage_init((group_count + 2 * count_sqrt) * (group_total + sizeof(struct group_info)), storage_file);
+	const int all_total = group_total + sizeof(struct group_info);
+	const int virtual_cnt = two_power_ceiling(group_count + 2 * count_sqrt);
+	struct storage *dev = storage_init(virtual_cnt * all_total, storage_file);
 	struct oram *actual_oram = malloc(sizeof(struct oram) + sizeof(SHA256_CTX) * group_count);
 	for (int i = 0; i < group_count; i++) {
 		SHA256_CTX *const ctx = &actual_oram->sha_ctx[i];
@@ -27,18 +42,18 @@ struct oram *oram_init(const int blk_size, const int group_size, const int group
 		crypto_hash(i, ctx, g_info.hash_val);
 		g_info.state = old;
 		g_info.idx = i;
-		storage_write(dev, i * (group_total + sizeof(struct group_info)), sizeof(struct group_info), &g_info);
+		storage_write(dev, i * all_total, sizeof(struct group_info), &g_info);
 
 		uint8_t buf2[group_total];
 		gen_random(buf2, group_total);
-		storage_write(dev, i * (group_total + sizeof(struct group_info)) + sizeof(struct group_info), group_total, buf2);
+		storage_write(dev, i * all_total + sizeof(struct group_info), group_total, buf2);
 	}
 
 	actual_oram->blk_size = blk_size;
 	actual_oram->group_size = group_size;
 	actual_oram->group_count = group_count;
 	actual_oram->dev = dev;
-
+	actual_oram->virtual_count = virtual_cnt;
 	oram_sort(actual_oram, compare_hash, 0, group_count + count_sqrt);
 	return actual_oram;
 }

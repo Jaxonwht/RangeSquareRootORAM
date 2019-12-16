@@ -12,8 +12,14 @@ enum state {
 	updated
 };
 
+enum sort_tag {
+	dummy,
+	valid
+};
+
 struct group_info {
 	enum state state;
+	enum sort_tag sort_tag;
 	int idx;
 	uint8_t hash_val[HASH_LEN];
 };
@@ -24,6 +30,7 @@ struct oram {
 	int group_count;
 	int dummy_count;
 	int shelter_count;
+	int virtual_count;
 	struct storage *dev;
 	SHA256_CTX sha_ctx[];
 };
@@ -42,8 +49,8 @@ struct range_oram *range_oram_init(int blk_size, int blk_count, const char *stor
 
 int oram_access(struct oram *oram, int idx, enum opcode, void *buffer);
 
-int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int end_group);
-int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int end_group);
+int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int group_count);
+int oram_sort_improved(const struct oram *oram, group_comparator compare, int start_group, int group_count);
 
 int range_oram_access(const struct range_oram *range_oram, int idx, int blk_range, enum opcode op, void *buffer);
 
