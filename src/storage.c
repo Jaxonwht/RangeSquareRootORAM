@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 struct storage {
-	int size;
+	unsigned long size;
 	char *file_name;
 	FILE *fp;
 };
@@ -19,7 +19,7 @@ struct storage {
  *
  * @return number of bytes occupied.
  */
-int get_size(const struct storage *dev)
+unsigned long get_size(const struct storage *dev)
 {
 	return dev->size;
 }
@@ -32,7 +32,7 @@ int get_size(const struct storage *dev)
  *
  * @return a handler of the storage device.
  */
-struct storage *storage_init(int size, const char *path)
+struct storage *storage_init(unsigned long size, const char *path)
 {
 	struct storage *dev = malloc(sizeof(*dev));
 	void *const zero_data = calloc(size, 1);

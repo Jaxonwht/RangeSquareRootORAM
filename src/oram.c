@@ -7,7 +7,6 @@
 #include <storage.h>
 #include <sha256.h>
 #include <utils.h>
-#include <utils.h>
 
 static void gen_random(uint8_t *s, int len) {
 	for (int i = 0; i < len; ++i) {
@@ -156,7 +155,7 @@ int oram_destroy(struct oram *oram)
  *
  * @return size in bytes.
  */
-int oram_used_memory(const struct oram *oram)
+unsigned long oram_used_memory(const struct oram *oram)
 {
 	return get_size(oram->dev);
 }

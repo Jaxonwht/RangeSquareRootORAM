@@ -20,4 +20,6 @@ int two_power_ceiling(int n);
 
 int get_rand(int low, int high);
 
+unsigned long get_memory_usage(void);
+
 #endif

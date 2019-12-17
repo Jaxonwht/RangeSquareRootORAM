@@ -4,9 +4,31 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <utils.h>
+#include <stdbool.h>
 
 /* Instruction files that only contain read accesses do not specify a block size, use 4 bytes in that case. */
 static const int DEFAULT_BLK_SIZE = 4;
+
+/*
+ * Process all the instructions. Read instructions are read into dummy buffers.
+ *
+ * @param range_oram: range_oram handler.
+ * @param instruct: instruction array.
+ * @param blk_size: block size in bytes.
+ * @param blk_count: total number of blocks spanned by the instructions.
+ */
+static void range_oram_process_instruction(struct range_oram *range_oram, const struct instruction *instruct, int blk_size, int blk_count)
+{
+	char buf[blk_size * blk_count];
+	while (!instruct) {
+		if (instruct->op == READ) {
+			range_oram_access(range_oram, instruct->idx, instruct->size, READ, buf);
+		} else if (instruct->op == WRITE) {
+			range_oram_access(range_oram, instruct->idx, instruct->size, WRITE, instruct->data);
+		}
+		instruct = instruct->next;
+	}
+}
 
 /*
  * Main function to run a range square-rootrange_oram
@@ -46,11 +68,12 @@ int main(int argc, char *argv[])
 			fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", blk_size, blk_count);
 			fprintf(log_fp, "Initializingrange_oram: %ld microseconds\n", timediff);
 		} else {
+			blk_size = DEFAULT_BLK_SIZE;
 			gettimeofday(&tv1, NULL);
-			range_oram = range_oram_init(DEFAULT_BLK_SIZE, blk_count, argv[4]);
+			range_oram = range_oram_init(blk_size, blk_count, argv[4]);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", DEFAULT_BLK_SIZE, blk_count);
+			fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", blk_size, blk_count);
 			fprintf(log_fp, "Initializingrange_oram: %ld microseconds\n", timediff);
 		}
 	} else if (!strcmp(argv[1], "generate") && argc == 11) {
@@ -111,7 +134,10 @@ int main(int argc, char *argv[])
 		printf("Urecognized command.\n");
 		return 1;
 	}
-	fprintf(log_fp, "Storage used: %d bytes\n",range_oram_used_memory(range_oram));
+	fprintf(log_fp, "Client memory used: %lu KiB (1024 bytes)\n", get_memory_usage());
+	fprintf(log_fp, "Storage used: %lu bytes\n",range_oram_used_memory(range_oram));
+	gettimeofday(&tv1, NULL);
+	range_oram_process_instruction(range_oram, instruct, blk_size, blk_count);
 	fclose(log_fp);
 	range_oram_destroy(range_oram);
 	instruction_free(instruct);

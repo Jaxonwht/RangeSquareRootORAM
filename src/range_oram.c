@@ -160,9 +160,9 @@ int range_oram_destroy(struct range_oram *range_oram)
  *
  * @return size in bytes.
  */
-int range_oram_used_memory(const struct range_oram *range_oram)
+unsigned long range_oram_used_memory(const struct range_oram *range_oram)
 {
-	int sum = 0;
+	unsigned long sum = 0;
 	for (int i = 0; i < range_oram->depth; i++) {
 		sum += oram_used_memory(range_oram->oram_tree[i]);
 	}

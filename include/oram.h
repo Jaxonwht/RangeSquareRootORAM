@@ -37,8 +37,8 @@ struct oram {
 
 struct range_oram;
 
-int oram_used_memory(const struct oram *oram);
-int range_oram_used_memory(const struct range_oram *range_oram);
+unsigned long oram_used_memory(const struct oram *oram);
+unsigned long range_oram_used_memory(const struct range_oram *range_oram);
 
 int compare_hash(const struct group_info *a, const struct group_info *b);
 

@@ -1,8 +1,10 @@
 #include <utils.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <string.h>
 
 /*
  * Get the time difference between two timestamps in microseconds.
@@ -86,4 +88,31 @@ int mkdir_force(const char *dir_name)
 	}
 }
 
-
+/*
+ * Get the memory usage of the current process.
+ *
+ * @return memory used in KiB (1024 bytes).
+ */
+unsigned long get_memory_usage(void)
+{
+	FILE *const procfile = fopen("/proc/self/status", "r");
+	long to_read = 8192;
+	char buffer[to_read];
+	fread(buffer, sizeof(char), to_read, procfile);
+	fclose(procfile);
+	bool found_vmsize = false;
+	char *search_result;
+	unsigned long vmsize_kb;
+	/* Look through proc status contents line by line */
+	char delims[] = "\n";
+	char *line = strtok(buffer, delims);
+	while (line != NULL && !found_vmsize) {
+		search_result = strstr(line, "VmSize:");
+		if (search_result != NULL) {
+			sscanf(line, "%*s %lu", &vmsize_kb);
+			found_vmsize = true;
+		}
+		line = strtok(NULL, delims);
+	}
+	return vmsize_kb;
+}
