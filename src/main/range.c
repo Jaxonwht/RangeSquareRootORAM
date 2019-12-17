@@ -52,35 +52,51 @@ int main(int argc, char *argv[])
 	long timediff;
 	FILE *log_fp;
 	if (!strcmp(argv[1], "parse") && argc == 5) {
-		log_fp = fopen(argv[3], "w");
+		log_fp = fopen(argv[3], "r");
+		if (log_fp == NULL) {
+			log_fp = fopen(argv[3], "a");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+		} else {
+			fclose(log_fp);
+			log_fp = fopen(argv[3], "a");
+		}
 		gettimeofday(&tv1, NULL);
 		instruct = parse_instruction(argv[2], &blk_size, &blk_count);
 		gettimeofday(&tv2, NULL);
 		timediff = timediffusec(&tv1, &tv2);
-		fprintf(log_fp, "ORAM type: range tree\n");
-		fprintf(log_fp, "Instruction file: %s\n", argv[2]);
-		fprintf(log_fp, "Parsing instruction file: %ld microseconds\n", timediff);
+		fprintf(log_fp, "%d\t", 1);
+		fprintf(log_fp, "%s\t", argv[2]);
+		fprintf(log_fp, "%ld\t", timediff);
 		if (blk_size != -1) {
 			gettimeofday(&tv1, NULL);
 			range_oram = range_oram_init(blk_size, blk_count, argv[4]);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", blk_size, blk_count);
-			fprintf(log_fp, "Initializingrange_oram: %ld microseconds\n", timediff);
+			fprintf(log_fp, "%d\t", blk_size);
+			fprintf(log_fp, "%d\t", blk_count);
+			fprintf(log_fp, "%ld\t", timediff);
 		} else {
 			blk_size = DEFAULT_BLK_SIZE;
 			gettimeofday(&tv1, NULL);
 			range_oram = range_oram_init(blk_size, blk_count, argv[4]);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", blk_size, blk_count);
-			fprintf(log_fp, "Initializingrange_oram: %ld microseconds\n", timediff);
+			fprintf(log_fp, "%d\t", blk_size);
+			fprintf(log_fp, "%d\t", blk_count);
+			fprintf(log_fp, "%ld\t", timediff);
 		}
 	} else if (!strcmp(argv[1], "generate") && argc == 11) {
 		int num_access;
 		int max_range;
-		log_fp = fopen(argv[9], "w");
-		fprintf(log_fp, "ORAM type: range tree\n");
+		log_fp = fopen(argv[9], "r");
+		if (log_fp == NULL) {
+			log_fp = fopen(argv[9], "a");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+		} else {
+			fclose(log_fp);
+			log_fp = fopen(argv[9], "a");
+		}
+		fprintf(log_fp, "%d\t", 1);
 		sscanf(argv[2], "%d", &num_access);
 		sscanf(argv[3], "%d", &blk_size);
 		sscanf(argv[4], "%d", &blk_count);
@@ -122,22 +138,26 @@ int main(int argc, char *argv[])
 		instruct = parse_instruction(argv[8], &a, &b);
 		gettimeofday(&tv2, NULL);
 		timediff = timediffusec(&tv1, &tv2);
-		fprintf(log_fp, "Instruction file: %s\n", argv[8]);
-		fprintf(log_fp, "Parsing instruction file: %ld microseconds\n", timediff);
+		fprintf(log_fp, "%s\t", argv[8]);
+		fprintf(log_fp, "%ld\t", timediff);
 		gettimeofday(&tv1, NULL);
 		range_oram = range_oram_init(blk_size, blk_count, argv[10]);
 		gettimeofday(&tv2, NULL);
 		timediff = timediffusec(&tv1, &tv2);
-		fprintf(log_fp, "Block size: %d bytes\nBlock count: %d\n", blk_size, blk_count);
-		fprintf(log_fp, "Initializingrange_oram: %ld microseconds\n", timediff);
+		fprintf(log_fp, "%d\t", blk_size);
+		fprintf(log_fp, "%d\t", blk_count);
+		fprintf(log_fp, "%ld\t", timediff);
 	} else {
 		printf("Urecognized command.\n");
 		return 1;
 	}
-	fprintf(log_fp, "Client memory used: %lu KiB (1024 bytes)\n", get_memory_usage());
-	fprintf(log_fp, "Storage used: %lu bytes\n",range_oram_used_memory(range_oram));
+	fprintf(log_fp, "%lu\t", get_memory_usage());
+	fprintf(log_fp, "%lu\t", range_oram_used_memory(range_oram));
 	gettimeofday(&tv1, NULL);
 	range_oram_process_instruction(range_oram, instruct, blk_size, blk_count);
+	gettimeofday(&tv2, NULL);
+	timediff = timediffusec(&tv1, &tv2);
+	fprintf(log_fp, "%ld\n", timediff);
 	fclose(log_fp);
 	range_oram_destroy(range_oram);
 	instruction_free(instruct);
