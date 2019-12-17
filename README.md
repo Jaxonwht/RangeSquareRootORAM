@@ -8,11 +8,17 @@ This is a tree range ORAM implementation based on the square-root ORAM.
 make
 ```
 
-The resulting binary files will be put in **bin/**
+The resulting binary files will be put in `bin/`.
+The resulting test binary files will be put in `test/`.
 
 ## Run
 
-`./test_instruction.sh` to test instruction generation and testing functionalities. The generated instruction files are in `data/instruction/` Detailed comments are in the shell file.
+```bash
+./run_single.sh
+./run_range.sh
+```
+
+The log files will be placed in `log/`.
 
 ## Clean
 

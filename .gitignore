@@ -1,4 +1,5 @@
 bin
+log
 obj
 compile_commands.json
 *.vim

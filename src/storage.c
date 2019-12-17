@@ -13,35 +13,15 @@ struct storage {
 };
 
 /*
- * Utility function to print data, of size bytes.
+ * Get the number of bytes of storage used.
  *
- * @param data: data pointer.
- * @param size: number of bytes to print.
- */
-void hex_dump(const void *data, int size)
-{
-	printf("%02hhx", ((uint8_t *)data)[0]);
-	for (int i = 1; i < size; i++) {
-		printf(" %02hhx", ((uint8_t *)data)[i]);
-	}
-	printf("\n");
-}
-
-/*
- * mkdir -p to create the data directory.
+ * @param dev: storage handler.
  *
- * @return 0 on success.
- * @return -1 on failure.
+ * @return number of bytes occupied.
  */
-int mkdir_force(const char *dir_name)
+int get_size(const struct storage *dev)
 {
-	int ret = mkdir(dir_name, 0755);
-	if (ret != 0 && ret != EEXIST) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
+	return dev->size;
 }
 
 /*

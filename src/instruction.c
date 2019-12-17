@@ -4,19 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
-/*
- * Generate a random number between low and high - 1.
- *
- * @param low: lower bound.
- * @param high: upper bound + 1.
- *
- * @return a random int.
- */
-static int get_rand(int low, int high)
-{
-	return low + rand() % (high - low);
-}
+#include <utils.h>
 
 /*
  * Generate random accesses.

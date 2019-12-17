@@ -13,4 +13,6 @@ int storage_destroy(struct storage *dev);
 
 void hex_dump(const void *data, int size);
 
+int get_size(const struct storage *dev);
+
 #endif

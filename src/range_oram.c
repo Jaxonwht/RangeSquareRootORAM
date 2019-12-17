@@ -1,4 +1,4 @@
-#include "instruction.h"
+#include <instruction.h>
 #include <stdio.h>
 #include <oram.h>
 #include <stdbool.h>
@@ -151,4 +151,20 @@ int range_oram_destroy(struct range_oram *range_oram)
 	}
 	free(range_oram);
 	return 0;
+}
+
+/*
+ * Get the number of bytes of disk usage.
+ *
+ * @param range_oram: range_oram handler.
+ *
+ * @return size in bytes.
+ */
+int range_oram_used_memory(const struct range_oram *range_oram)
+{
+	int sum = 0;
+	for (int i = 0; i < range_oram->depth; i++) {
+		sum += oram_used_memory(range_oram->oram_tree[i]);
+	}
+	return sum;
 }

@@ -7,25 +7,12 @@
 #include <storage.h>
 #include <sha256.h>
 #include <utils.h>
-#include "sha256.h"
+#include <utils.h>
 
 static void gen_random(uint8_t *s, int len) {
 	for (int i = 0; i < len; ++i) {
-		s[i] = rand() & 0xFF;
+		s[i] = (uint8_t)rand();
 	}
-}
-
-static int two_power_ceiling(int n) {
-	int count = -1;
-	int carry = 0;
-	while (n > 0) {
-		if ((n & 1) && (n != 1)) {
-			carry = 1;
-		}
-		n >>= 1;
-		count++;
-	}
-	return 1 << (count + carry);
 }
 
 struct oram *oram_init(const int blk_size, const int group_size, const int group_count, const char *storage_file) {
@@ -148,9 +135,28 @@ int oram_access(struct oram *oram, int idx, enum opcode code, void *buffer) {
 	return 0;
 }
 
+/*
+ * Destroy the oram and free relevant resources.
+ *
+ * @param oram: oram handler.
+ *
+ * @return 0 on success and -1 otherwise.
+ */
 int oram_destroy(struct oram *oram)
 {
 	storage_destroy(oram->dev);
 	free(oram);
 	return 0;
+}
+
+/*
+ * Get the number of bytes of disk usage.
+ *
+ * @param oram: oram handler.
+ *
+ * @return size in bytes.
+ */
+int oram_used_memory(const struct oram *oram)
+{
+	return get_size(oram->dev);
 }
