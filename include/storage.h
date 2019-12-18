@@ -11,8 +11,6 @@ int storage_write(const struct storage *dev, int offset, int size, const void *b
 
 int storage_destroy(struct storage *dev);
 
-void hex_dump(const void *data, int size);
-
 unsigned long get_size(const struct storage *dev);
 
 #endif

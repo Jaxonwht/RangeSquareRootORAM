@@ -12,15 +12,14 @@ enum state {
 	updated
 };
 
-enum sort_tag {
-	dummy,
-	valid
-};
-
 struct group_info {
 	enum state state;
-	enum sort_tag sort_tag;
 	int idx;
+	uint8_t hash_val[HASH_LEN];
+};
+
+struct oracle {
+	SHA256_CTX sha_ctx;
 	uint8_t hash_val[HASH_LEN];
 };
 
@@ -32,7 +31,7 @@ struct oram {
 	int shelter_count;
 	int virtual_count;
 	struct storage *dev;
-	SHA256_CTX sha_ctx[];
+	struct oracle oracles[];
 };
 
 struct range_oram;

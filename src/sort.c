@@ -14,53 +14,67 @@ enum dir {
 	DESCENDING
 };
 
-static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, group_comparator compare)
+enum sort_tag {
+	VALID,
+	DUMMY
+};
+
+static void compareAndSwap(int i, int j, enum dir dir, const struct oram *oram, group_comparator compare, enum sort_tag tags[])
 {
-	struct group_info info_i;
-	struct group_info info_j;
+	const enum sort_tag tag_i = tags[i];
+	const enum sort_tag tag_j = tags[j];
+
+	if ((tag_i == DUMMY && tag_j == DUMMY ) || (dir == ASCENDING && tag_j == DUMMY) || (dir == DESCENDING && tag_i == DUMMY)) {
+		return;
+	}
 
 	const int group_size = oram->group_size;
 	const int blk_size = oram->blk_size;
 	const int data_size = group_size * blk_size;
 	const int myconst = data_size + sizeof(struct group_info);
 
-	uint8_t data_i[data_size];
-	uint8_t data_j[data_size];
+	uint8_t buf_i[myconst];
+	uint8_t buf_j[myconst];
 
-	storage_read(oram->dev, i * myconst, sizeof(struct group_info), &info_i);
-	storage_read(oram->dev, j * myconst, sizeof(struct group_info), &info_j);
-	storage_read(oram->dev, i * myconst + sizeof(struct group_info), data_size, data_i);
-	storage_read(oram->dev, j * myconst + sizeof(struct group_info), data_size, data_j);
+	struct group_info *info_i = (struct group_info *)buf_i;
+	struct group_info *info_j = (struct group_info *)buf_j;
 
-	const int compare_res = compare(&info_i, &info_j);
-	if ((dir == ASCENDING && compare_res > 0) || (dir == DESCENDING && compare_res < 0)) {
-		storage_write(oram->dev, i * myconst, sizeof(struct group_info), &info_j);
-		storage_write(oram->dev, j * myconst, sizeof(struct group_info), &info_i);
+	uint8_t *data_i = buf_i + sizeof(struct group_info);
+	uint8_t *data_j = buf_j + sizeof(struct group_info);
 
+	storage_read(oram->dev, i * myconst, myconst, buf_i);
+	storage_read(oram->dev, j * myconst, myconst, buf_j);
+
+	const int compare_res = compare(info_i, info_j);
+	if ((dir == ASCENDING && (compare_res > 0 || tag_i == DUMMY)) || (dir == DESCENDING && (compare_res < 0 || tag_j == DUMMY))) {
+		tags[i] = tag_j;
+		tags[j] = tag_i;
+		storage_write(oram->dev, i * myconst, sizeof(struct group_info), info_j);
+		storage_write(oram->dev, j * myconst, sizeof(struct group_info), info_i);
 		storage_write(oram->dev, i * myconst + sizeof(struct group_info), data_size, data_j);
 		storage_write(oram->dev, j * myconst + sizeof(struct group_info), data_size, data_i);
 	}
 }
 
-static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
+static void bitonicMerge(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare, enum sort_tag tags[])
 {
 	if (cnt > 1) {
 		const int k = cnt >> 1;
 		for (int i= lo; i < lo + k; i++) {
-			compareAndSwap(i, i + k, dir, oram, compare);
+			compareAndSwap(i, i + k, dir, oram, compare, tags);
 		}
-		bitonicMerge(lo, k, dir, oram, compare);
-		bitonicMerge(lo + k, k, dir, oram, compare);
+		bitonicMerge(lo, k, dir, oram, compare, tags);
+		bitonicMerge(lo + k, k, dir, oram, compare, tags);
 	}
 }
 
-static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare)
+static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *oram, group_comparator compare, enum sort_tag tags[])
 {
 	if (cnt > 1) {
 		const int k = cnt >> 1;
-		bitonicSort(lo, k, ASCENDING, oram, compare);
-		bitonicSort(lo + k, k, DESCENDING, oram, compare);
-		bitonicMerge(lo, cnt, dir, oram, compare);
+		bitonicSort(lo, k, ASCENDING, oram, compare, tags);
+		bitonicSort(lo + k, k, DESCENDING, oram, compare, tags);
+		bitonicMerge(lo, cnt, dir, oram, compare, tags);
 	}
 }
 
@@ -80,17 +94,15 @@ static void bitonicSort(int lo, int cnt, const enum dir dir, const struct oram *
  */
 int oram_sort(const struct oram *oram, group_comparator compare, int start_group, int group_count)
 {
-	struct group_info g_info;
+	enum sort_tag tags[oram->virtual_count];
 	for (int i = 0; i < oram->virtual_count; i++) {
-		storage_read(oram->dev, i * (oram->group_size * oram->blk_size + sizeof(struct group_info)), sizeof(struct group_info), &g_info);
 		if (i >= start_group && i < start_group + group_count) {
-			g_info.sort_tag = valid;
+			tags[i] = VALID;
 		} else {
-			g_info.sort_tag = dummy;
+			tags[i] = DUMMY;
 		}
-		storage_write(oram->dev, i * (oram->group_size * oram->blk_size + sizeof(struct group_info)), sizeof(struct group_info), &g_info);
 	}
-	bitonicSort(0, oram->virtual_count, ASCENDING, oram, compare);
+	bitonicSort(0, oram->virtual_count, ASCENDING, oram, compare, tags);
 	return 0;
 }
 
@@ -125,15 +137,6 @@ int oram_sort_improved(const struct oram *oram, group_comparator compare, int st
  */
 int compare_hash(const struct group_info *a, const struct group_info *b)
 {
-	if (a->sort_tag == dummy && b->sort_tag == dummy) {
-		return 0;
-	}
-	if (a->sort_tag == dummy) {
-		return 1;
-	}
-	if (b->sort_tag == dummy) {
-		return -1;
-	}
 	return memcmp(a->hash_val, b->hash_val, HASH_LEN);
 }
 
@@ -149,16 +152,6 @@ int compare_hash(const struct group_info *a, const struct group_info *b)
  */
 int compare_restore(const struct group_info *a, const struct group_info *b)
 {
-
-	if (a->sort_tag == dummy && b->sort_tag == dummy) {
-		return 0;
-	}
-	if (a->sort_tag == dummy) {
-		return 1;
-	}
-	if (b->sort_tag == dummy) {
-		return -1;
-	}
 	if (a->idx != b->idx) {
 		return a->idx - b->idx;
 	}
