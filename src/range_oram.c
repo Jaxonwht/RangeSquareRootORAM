@@ -12,6 +12,7 @@ struct range_oram {
 	int blk_size;
 	int blk_count;
 	int depth;
+	char *storage_dir;
 	struct oram *oram_tree[];
 };
 
@@ -70,13 +71,14 @@ static int active_oram_idx(int blk_count)
  * @param blk_size: size of a block is bytes.
  * @param blk_count: total number of blocks.
  * @param storage_folder: path to the storage folder.
+ * @param data: data to prepopulate the tree.
  *
  * @return pointer to the initialized range_oram.
  */
-struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder)
+struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder, const void *data)
 {
 	mkdir_force(storage_folder);
-	char buf[strlen(storage_folder) + 1];
+	char *buf = malloc(strlen(storage_folder) + 1);
 	strcpy(buf, storage_folder);
 	if (buf[strlen(storage_folder) - 1] == '/') {
 		buf[strlen(storage_folder) - 1] = '\0';
@@ -86,10 +88,11 @@ struct range_oram *range_oram_init(int blk_size, int blk_count, const char *stor
 	range_oram->blk_size = blk_size;
 	range_oram->blk_count = blk_count;
 	range_oram->depth = depth;
+	range_oram->storage_dir = buf;
 	char path_buf[255];
 	for (int i = 0; i < depth; i++) {
 		sprintf(path_buf, "%s/%09d.img", buf, i);
-		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf);
+		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf, data);
 	}
 	return range_oram;
 }
@@ -149,6 +152,8 @@ int range_oram_destroy(struct range_oram *range_oram)
 	for (int i = 0; i < range_oram->depth; i++) {
 		oram_destroy(range_oram->oram_tree[i]);
 	}
+	remove(range_oram->storage_dir);
+	free(range_oram->storage_dir);
 	free(range_oram);
 	return 0;
 }

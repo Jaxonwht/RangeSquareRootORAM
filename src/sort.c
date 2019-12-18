@@ -152,14 +152,31 @@ int compare_hash(const struct group_info *a, const struct group_info *b)
  */
 int compare_restore(const struct group_info *a, const struct group_info *b)
 {
-	if (a->idx != b->idx) {
-		return a->idx - b->idx;
-	}
-	if (a->state == old && b->state == updated) {
-		return 1;
-	}
-	if (a->state == updated && b->state == old) {
-		return -1;
+	switch (a->state) {
+	case INVALID:
+		switch (b->state) {
+		case INVALID:
+			return 0;
+		case UNCHANGED:
+		case NEW:
+			return 1;	
+		}
+	case UNCHANGED:
+		switch (b->state) {
+		case INVALID:
+			return -1;
+		case UNCHANGED:
+		case NEW:
+			return a->idx - b->idx;
+		}
+	case NEW:
+		switch (b->state) {
+		case INVALID:
+			return -1;
+		case UNCHANGED:
+		case NEW:
+			return a->idx - b->idx;
+		}
 	}
 	return 0;
 }

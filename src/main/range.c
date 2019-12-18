@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <utils.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 /* Instruction files that only contain read accesses do not specify a block size, use 4 bytes in that case. */
 static const int DEFAULT_BLK_SIZE = 4;
@@ -27,6 +28,19 @@ static void range_oram_process_instruction(struct range_oram *range_oram, const 
 			range_oram_access(range_oram, instruct->idx, instruct->size, WRITE, instruct->data);
 		}
 		instruct = instruct->next;
+	}
+}
+
+/*
+ * Fill the data array with random values.
+ *
+ * @param data: data array.
+ * @param len: length of the data array.
+ */
+static void gen_rand(uint8_t data[], int len)
+{
+	for (int i = 0; i < len; i++) {
+		data[i] = (uint8_t)rand();
 	}
 }
 
@@ -68,8 +82,10 @@ int main(int argc, char *argv[])
 		fprintf(log_fp, "%s\t", argv[2]);
 		fprintf(log_fp, "%ld\t", timediff);
 		if (blk_size != -1) {
+			uint8_t data[blk_size * blk_count];
+			gen_rand(data, blk_size * blk_count);
 			gettimeofday(&tv1, NULL);
-			range_oram = range_oram_init(blk_size, blk_count, argv[4]);
+			range_oram = range_oram_init(blk_size, blk_count, argv[4], data);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
 			fprintf(log_fp, "%d\t", blk_size);
@@ -77,8 +93,10 @@ int main(int argc, char *argv[])
 			fprintf(log_fp, "%ld\t", timediff);
 		} else {
 			blk_size = DEFAULT_BLK_SIZE;
+			uint8_t data[blk_size * blk_count];
+			gen_rand(data, blk_size * blk_count);
 			gettimeofday(&tv1, NULL);
-			range_oram = range_oram_init(blk_size, blk_count, argv[4]);
+			range_oram = range_oram_init(blk_size, blk_count, argv[4], data);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
 			fprintf(log_fp, "%d\t", blk_size);
@@ -140,8 +158,10 @@ int main(int argc, char *argv[])
 		timediff = timediffusec(&tv1, &tv2);
 		fprintf(log_fp, "%s\t", argv[8]);
 		fprintf(log_fp, "%ld\t", timediff);
+		uint8_t data[blk_size * blk_count];
+		gen_rand(data, blk_size * blk_count);
 		gettimeofday(&tv1, NULL);
-		range_oram = range_oram_init(blk_size, blk_count, argv[10]);
+		range_oram = range_oram_init(blk_size, blk_count, argv[10], data);
 		gettimeofday(&tv2, NULL);
 		timediff = timediffusec(&tv1, &tv2);
 		fprintf(log_fp, "%d\t", blk_size);

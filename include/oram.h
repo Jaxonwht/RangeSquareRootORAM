@@ -8,8 +8,9 @@
 #include <stdint.h>
 
 enum state {
-	old,
-	updated
+	INVALID,
+	UNCHANGED,
+	NEW
 };
 
 struct group_info {
@@ -45,9 +46,9 @@ int compare_restore(const struct group_info *a, const struct group_info *b);
 
 typedef int (*group_comparator)(const struct group_info *a, const struct group_info *b);
 
-struct oram *oram_init(int blk_size, int group_size, int group_count, const char *storage_file);
+struct oram *oram_init(int blk_size, int group_size, int group_count, const char *storage_file, const void *data);
 
-struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder);
+struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder, const void *data);
 
 int oram_access(struct oram *oram, int idx, enum opcode, void *buffer);
 

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 		fprintf(log_fp, "%ld\t", timediff);
 		if (blk_size != -1) {
 			gettimeofday(&tv1, NULL);
-			oram = oram_init(blk_size, 1, blk_count, argv[4]);
+			oram = oram_init(blk_size, 1, blk_count, argv[4], NULL);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
 			fprintf(log_fp, "%d\t", blk_size);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 		} else {
 			blk_size = DEFAULT_BLK_SIZE;
 			gettimeofday(&tv1, NULL);
-			oram = oram_init(blk_size, 1, blk_count, argv[4]);
+			oram = oram_init(blk_size, 1, blk_count, argv[4], NULL);
 			gettimeofday(&tv2, NULL);
 			timediff = timediffusec(&tv1, &tv2);
 			fprintf(log_fp, "%d\t", blk_size);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 		fprintf(log_fp, "%s\t", argv[8]);
 		fprintf(log_fp, "%ld\t", timediff);
 		gettimeofday(&tv1, NULL);
-		oram = oram_init(blk_size, 1, blk_count, argv[10]);
+		oram = oram_init(blk_size, 1, blk_count, argv[10], NULL);
 		gettimeofday(&tv2, NULL);
 		timediff = timediffusec(&tv1, &tv2);
 		fprintf(log_fp, "%d\t", blk_size);

@@ -22,4 +22,6 @@ int get_rand(int low, int high);
 
 unsigned long get_memory_usage(void);
 
+void hex_dump(const void *data, int size);
+
 #endif
