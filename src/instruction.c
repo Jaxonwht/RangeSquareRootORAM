@@ -29,11 +29,13 @@ int generate_rand(const char *file_name, int num_access, int range, int max_len,
 		const int offset = get_rand(0, range - size + 1);
 		if (rand() & 1) {
 			fprintf(fp, "%s %d %d\n", WRITE_STR, offset, size);
+			/*
 			for (int k = 0; k < blk_size * size; k++) {
 				uint8_t rand_byte = (uint8_t)rand();
 				fprintf(fp, "%02x ", rand_byte);
 			}
 			fprintf(fp, "\n");
+			*/
 		} else {
 			fprintf(fp, "%s %d %d\n", READ_STR, offset, size);
 		}
@@ -49,15 +51,16 @@ int generate_rand(const char *file_name, int num_access, int range, int max_len,
  * @param num_read: total number of block reads.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks read in a single instruction.
+ * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand_read(const char *file_name, int num_read, int range, int max_len)
+int generate_rand_read(const char *file_name, int num_read, int range, int max_len, int blk_size)
 {
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", -1, range);
+	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
 	for (int i = 0; i < num_read; i++) {
 		const int size = get_rand(1, max_len + 1);
 		const int offset = get_rand(0, range - size + 1);
@@ -88,12 +91,14 @@ int generate_rand_write(const char *file_name, int num_write, int range, int max
 		const int size = get_rand(1, max_len + 1);
 		const int offset = get_rand(0, range - size + 1);
 		fprintf(fp, "%s %d %d\n", WRITE_STR, offset, size);
+		/*
 		for (int k = 0; k < blk_size * size; k++) {
 			uint8_t rand_byte;
 			rand_byte = (uint8_t)get_rand(0, 0x100);
 			fprintf(fp, "%02x ", rand_byte);
 		}
 		fprintf(fp, "\n");
+		*/
 	}
 	fclose(fp);
 	return 0;
@@ -126,11 +131,13 @@ int generate_seq(const char *file_name, int range, int max_len, int blk_size)
 		}
 		if (rand() & 1) {
 			fprintf(fp, "%s %d %d\n", WRITE_STR, idx, actual_size);
+			/*
 			for (int k = 0; k < blk_size * actual_size; k++) {
 				uint8_t rand_byte = (uint8_t)rand();
 				fprintf(fp, "%02x ", rand_byte);
 			}
 			fprintf(fp, "\n");
+			*/
 		} else {
 			fprintf(fp, "%s %d %d\n", READ_STR, idx, actual_size);
 		}
@@ -146,15 +153,16 @@ int generate_seq(const char *file_name, int range, int max_len, int blk_size)
  * @param file_name: file name of the instruction file.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks read in a single instruction.
+ * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq_read(const char *file_name, int range, int max_len)
+int generate_seq_read(const char *file_name, int range, int max_len, int blk_size)
 {
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", -1, range);
+	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
 	int idx = 0;
 	while (idx < range) {
 		const int size = get_rand(1, max_len + 1);
@@ -195,11 +203,13 @@ int generate_seq_write(const char *file_name, int range, int max_len, int blk_si
 			actual_size = size;
 		}
 		fprintf(fp, "%s %d %d\n", WRITE_STR, idx, actual_size);
+		/*
 		for (int k = 0; k < blk_size * actual_size; k++) {
 			uint8_t rand_byte = (uint8_t)rand();
 			fprintf(fp, "%02x ", rand_byte);
 		}
 		fprintf(fp, "\n");
+		*/
 		idx = next;
 	}
 	fclose(fp);
@@ -234,11 +244,13 @@ struct instruction *parse_instruction(const char *file_name, int *blk_size, int 
 		iter = iter->next;
 		if (!strncmp(op_buf, WRITE_STR, WRITE_STR_LEN)) {
 			iter->op = WRITE;
+			/*
 			iter->data = malloc(size * *blk_size);
 			for (int i = 0; i < size * *blk_size; i++) {
 				fscanf(fp, "%02hhx ", (uint8_t *)iter->data + i);
 			}
 			fscanf(fp, "\n");
+			*/
 		} else if (!strncmp(op_buf, READ_STR, READ_STR_LEN)){
 			iter->op = READ;
 		}
@@ -264,10 +276,29 @@ int instruction_free(struct instruction *instruct)
 {
 	struct instruction *tmp;
 	while (instruct != NULL) {
+		/*
 		free(instruct->data);
+		*/
 		tmp = instruct;
 		instruct = instruct->next;
 		free(tmp);
 	}
 	return 0;
+}
+
+/*
+ * Get the total number of blocks accessed.
+ *
+ * @param instruction: instruction array.
+ * 
+ * @return number of blocks accessed in all the instructions.
+ */
+int get_num_blk_accessed(struct instruction *instruction)
+{
+	int num = 0;
+	while (instruction) {
+		num += instruction->size;
+		instruction = instruction->next;
+	}
+	return num;
 }

@@ -27,12 +27,8 @@ struct oram *oram_init(const int blk_size, const int group_size, const int group
 		memcpy(hash, g_info->hash_val, HASH_LEN);
 		g_info->state = UNCHANGED;
 		g_info->idx = i;
-		if (data) {
+		if (data && i < group_count) {
 			memcpy(group_data, data + i * group_total, group_total);
-		} else {
-			for (int i = 0; i < group_total; i++) {
-				group_data[i] = 0;
-			}
 		}
 		storage_write(dev, i * all_total, all_total, buf);
 	}

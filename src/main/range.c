@@ -7,9 +7,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/* Instruction files that only contain read accesses do not specify a block size, use 4 bytes in that case. */
-static const int DEFAULT_BLK_SIZE = 4;
-
 /*
  * Process all the instructions. Read instructions are read into dummy buffers.
  *
@@ -21,11 +18,12 @@ static const int DEFAULT_BLK_SIZE = 4;
 static void range_oram_process_instruction(struct range_oram *range_oram, const struct instruction *instruct, int blk_size, int blk_count)
 {
 	char buf[blk_size * blk_count];
-	while (!instruct) {
+	while (instruct) {
 		if (instruct->op == READ) {
 			range_oram_access(range_oram, instruct->idx, instruct->size, READ, buf);
 		} else if (instruct->op == WRITE) {
-			range_oram_access(range_oram, instruct->idx, instruct->size, WRITE, instruct->data);
+			char data[blk_size * instruct->size];
+			range_oram_access(range_oram, instruct->idx, instruct->size, WRITE, data);
 		}
 		instruct = instruct->next;
 	}
@@ -69,7 +67,7 @@ int main(int argc, char *argv[])
 		log_fp = fopen(argv[3], "r");
 		if (log_fp == NULL) {
 			log_fp = fopen(argv[3], "a");
-			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time_per_block/usec\n");
 		} else {
 			fclose(log_fp);
 			log_fp = fopen(argv[3], "a");
@@ -81,35 +79,22 @@ int main(int argc, char *argv[])
 		fprintf(log_fp, "%d\t", 1);
 		fprintf(log_fp, "%s\t", argv[2]);
 		fprintf(log_fp, "%ld\t", timediff);
-		if (blk_size != -1) {
-			uint8_t data[blk_size * blk_count];
-			gen_rand(data, blk_size * blk_count);
-			gettimeofday(&tv1, NULL);
-			range_oram = range_oram_init(blk_size, blk_count, argv[4], data);
-			gettimeofday(&tv2, NULL);
-			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "%d\t", blk_size);
-			fprintf(log_fp, "%d\t", blk_count);
-			fprintf(log_fp, "%ld\t", timediff);
-		} else {
-			blk_size = DEFAULT_BLK_SIZE;
-			uint8_t data[blk_size * blk_count];
-			gen_rand(data, blk_size * blk_count);
-			gettimeofday(&tv1, NULL);
-			range_oram = range_oram_init(blk_size, blk_count, argv[4], data);
-			gettimeofday(&tv2, NULL);
-			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "%d\t", blk_size);
-			fprintf(log_fp, "%d\t", blk_count);
-			fprintf(log_fp, "%ld\t", timediff);
-		}
+		uint8_t data[blk_size * blk_count];
+		gen_rand(data, blk_size * blk_count);
+		gettimeofday(&tv1, NULL);
+		range_oram = range_oram_init(blk_size, blk_count, argv[4], data);
+		gettimeofday(&tv2, NULL);
+		timediff = timediffusec(&tv1, &tv2);
+		fprintf(log_fp, "%d\t", blk_size);
+		fprintf(log_fp, "%d\t", blk_count);
+		fprintf(log_fp, "%ld\t", timediff);
 	} else if (!strcmp(argv[1], "generate") && argc == 11) {
 		int num_access;
 		int max_range;
 		log_fp = fopen(argv[9], "r");
 		if (log_fp == NULL) {
 			log_fp = fopen(argv[9], "a");
-			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time_per_block/usec\n");
 		} else {
 			fclose(log_fp);
 			log_fp = fopen(argv[9], "a");
@@ -130,9 +115,9 @@ int main(int argc, char *argv[])
 			}
 		} else if (!strcmp(argv[6], "r")) {
 			if (!strcmp(argv[7], "rand")) {
-				generate_rand_read(argv[8], num_access, blk_count, max_range);
+				generate_rand_read(argv[8], num_access, blk_count, max_range, blk_size);
 			} else if (!strcmp(argv[7], "seq")) {
-				generate_seq_read(argv[8], blk_count, max_range);
+				generate_seq_read(argv[8], blk_count, max_range, blk_size);
 			} else {
 				printf("Urecognized command.\n");
 				return 1;
@@ -177,7 +162,7 @@ int main(int argc, char *argv[])
 	range_oram_process_instruction(range_oram, instruct, blk_size, blk_count);
 	gettimeofday(&tv2, NULL);
 	timediff = timediffusec(&tv1, &tv2);
-	fprintf(log_fp, "%ld\n", timediff);
+	fprintf(log_fp, "%ld\n", timediff / get_num_blk_accessed(instruct));
 	fclose(log_fp);
 	range_oram_destroy(range_oram);
 	instruction_free(instruct);

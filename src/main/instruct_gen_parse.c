@@ -27,13 +27,6 @@ int main(int argc, char *argv[])
 		struct instruction *instruct = instruct_arr;
 		while (instruct != NULL) {
 			printf("op is %s, idx is %d, size is %d\n", instruct->op == READ ? "read" : "write", instruct->idx, instruct->size);
-			if (instruct->op == WRITE) {
-				printf("data is:");
-				for (int i = 0; i < instruct->size * blk_size; i++) {
-					printf(" %02hhx", *(uint8_t *)(instruct->data + i));
-				}
-				printf("\n");
-			}
 			instruct = instruct->next;
 		}
 		int ret = instruction_free(instruct_arr);
@@ -60,11 +53,11 @@ int main(int argc, char *argv[])
 		}
 		if (!strcmp(argv[6], "r")) {
 			if (!strcmp(argv[7], "rand")) {
-				generate_rand_read(argv[8], num_access, blk_count, max_range);
+				generate_rand_read(argv[8], num_access, blk_count, max_range, blk_size);
 				return 0;
 			}
 			if (!strcmp(argv[7], "seq")) {
-				generate_seq_read(argv[8], blk_count, max_range);
+				generate_seq_read(argv[8], blk_count, max_range, blk_size);
 				return 0;
 			}
 		}

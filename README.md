@@ -17,6 +17,12 @@ The resulting test binary files will be put in `test/`.
 ./run_single.sh
 ./run_range.sh
 ```
+To run examples of single and range oram.
+
+```bash
+./run.sh
+```
+This runs a large collection of examples. It'de be best to call `make clean` before calling `./run.sh`.
 
 The log files will be placed in `log/`.
 

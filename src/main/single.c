@@ -6,9 +6,6 @@
 #include <sys/time.h>
 #include <utils.h>
 
-/* Instruction files that only contain read accesses do not specify a block size, use 4 bytes in that case. */
-static const int DEFAULT_BLK_SIZE = 4;
-
 /*
  * Process all the instructions. Read instructions are read into dummy buffers.
  *
@@ -19,14 +16,15 @@ static const int DEFAULT_BLK_SIZE = 4;
 static void oram_process_instruction(struct oram *oram, const struct instruction *instruct, int blk_size)
 {
 	char buf[blk_size];
-	while (!instruct) {
+	while (instruct) {
 		if (instruct->op == READ) {
 			for (int i = 0; i < instruct->size; i++) {
 				oram_access(oram, instruct->idx + i, READ, buf);
 			}
 		} else if (instruct->op == WRITE) {
+			char data[instruct->size * blk_size];
 			for (int i = 0; i < instruct->size; i++) {
-				oram_access(oram, instruct->idx + i, WRITE, instruct->data + i * blk_size);
+				oram_access(oram, instruct->idx + i, WRITE, data + i * blk_size);
 			}
 		}
 		instruct = instruct->next;
@@ -58,7 +56,7 @@ int main(int argc, char *argv[])
 		log_fp = fopen(argv[3], "r");
 		if (log_fp == NULL) {
 			log_fp = fopen(argv[3], "a");
-			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time_per_block/usec\n");
 		} else {
 			fclose(log_fp);
 			log_fp = fopen(argv[3], "a");
@@ -70,31 +68,20 @@ int main(int argc, char *argv[])
 		fprintf(log_fp, "%d\t", 0);
 		fprintf(log_fp, "%s\t", argv[2]);
 		fprintf(log_fp, "%ld\t", timediff);
-		if (blk_size != -1) {
-			gettimeofday(&tv1, NULL);
-			oram = oram_init(blk_size, 1, blk_count, argv[4], NULL);
-			gettimeofday(&tv2, NULL);
-			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "%d\t", blk_size);
-			fprintf(log_fp, "%d\t", blk_count);
-			fprintf(log_fp, "%ld\t", timediff);
-		} else {
-			blk_size = DEFAULT_BLK_SIZE;
-			gettimeofday(&tv1, NULL);
-			oram = oram_init(blk_size, 1, blk_count, argv[4], NULL);
-			gettimeofday(&tv2, NULL);
-			timediff = timediffusec(&tv1, &tv2);
-			fprintf(log_fp, "%d\t", blk_size);
-			fprintf(log_fp, "%d\t", blk_count);
-			fprintf(log_fp, "%ld\t", timediff);
-		}
+		gettimeofday(&tv1, NULL);
+		oram = oram_init(blk_size, 1, blk_count, argv[4], NULL);
+		gettimeofday(&tv2, NULL);
+		timediff = timediffusec(&tv1, &tv2);
+		fprintf(log_fp, "%d\t", blk_size);
+		fprintf(log_fp, "%d\t", blk_count);
+		fprintf(log_fp, "%ld\t", timediff);
 	} else if (!strcmp(argv[1], "generate") && argc == 11) {
 		int num_access;
 		int max_range;
 		log_fp = fopen(argv[9], "r");
 		if (log_fp == NULL) {
 			log_fp = fopen(argv[9], "a");
-			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time/usec\n");
+			fprintf(log_fp, "Range\tInstruction_file\tInstruction_parsing_time/usec\tBlock_size/B\tBlock_count\tOram_initialization_time/usec\tClient_memory/KiB\tDisk_storage/B\tRunning_time_per_block/usec\n");
 		} else {
 			fclose(log_fp);
 			log_fp = fopen(argv[9], "a");
@@ -115,9 +102,9 @@ int main(int argc, char *argv[])
 			}
 		} else if (!strcmp(argv[6], "r")) {
 			if (!strcmp(argv[7], "rand")) {
-				generate_rand_read(argv[8], num_access, blk_count, max_range);
+				generate_rand_read(argv[8], num_access, blk_count, max_range, blk_size);
 			} else if (!strcmp(argv[7], "seq")) {
-				generate_seq_read(argv[8], blk_count, max_range);
+				generate_seq_read(argv[8], blk_count, max_range, blk_size);
 			} else {
 				printf("Urecognized command.\n");
 				return 1;
@@ -160,7 +147,7 @@ int main(int argc, char *argv[])
 	oram_process_instruction(oram, instruct, blk_size);
 	gettimeofday(&tv2, NULL);
 	timediff = timediffusec(&tv1, &tv2);
-	fprintf(log_fp, "%ld\n", timediff);
+	fprintf(log_fp, "%ld\n", timediff / get_num_blk_accessed(instruct));
 	fclose(log_fp);
 	oram_destroy(oram);
 	instruction_free(instruct);
