@@ -8,7 +8,7 @@
 #include <sha256.h>
 #include <utils.h>
 
-struct oram *oram_init(const int blk_size, const int group_size, const int group_count, const char *storage_file, const void *data) {
+struct oram *oram_init(const int blk_size, const int group_size, const int group_count, const char *storage_file, const void *data, int data_len) {
 	const int count_sqrt = (int)sqrt(group_count);
 	const int group_total = group_size * blk_size;
 	const int all_total = group_total + sizeof(struct group_info);
@@ -27,8 +27,13 @@ struct oram *oram_init(const int blk_size, const int group_size, const int group
 		memcpy(hash, g_info->hash_val, HASH_LEN);
 		g_info->state = UNCHANGED;
 		g_info->idx = i;
-		if (data && i < group_count) {
-			memcpy(group_data, data + i * group_total, group_total);
+		int min = group_total;
+		if (data_len < min) {
+			min = data_len;
+		}
+		if (data && min > 0) {
+			memcpy(group_data, data + i * group_total, min);
+			data_len -= min;
 		}
 		storage_write(dev, i * all_total, all_total, buf);
 	}

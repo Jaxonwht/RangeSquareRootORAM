@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	hex_dump(buf, 13);
 	storage_destroy(dev);
 	*/
-	struct range_oram *range_oram = range_oram_init(10, 10, argv[1], NULL);
+	struct range_oram *range_oram = range_oram_init(10, 10, argv[1], NULL, 0);
 	range_oram_destroy(range_oram);
 	return 0;
 }

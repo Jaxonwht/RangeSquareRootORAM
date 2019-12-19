@@ -9,3 +9,6 @@ test
 !src/test
 *.swp
 tags
+log_temp
+*.img
+*.jpeg

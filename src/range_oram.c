@@ -72,10 +72,11 @@ static int active_oram_idx(int blk_count)
  * @param blk_count: total number of blocks.
  * @param storage_folder: path to the storage folder.
  * @param data: data to prepopulate the tree.
+ * @param data_len: length in bytes of the prepopulating data.
  *
  * @return pointer to the initialized range_oram.
  */
-struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder, const void *data)
+struct range_oram *range_oram_init(int blk_size, int blk_count, const char *storage_folder, const void *data, int data_len)
 {
 	mkdir_force(storage_folder);
 	char *buf = malloc(strlen(storage_folder) + 1);
@@ -92,7 +93,7 @@ struct range_oram *range_oram_init(int blk_size, int blk_count, const char *stor
 	char path_buf[255];
 	for (int i = 0; i < depth; i++) {
 		sprintf(path_buf, "%s/%09d.img", buf, i);
-		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf, data);
+		range_oram->oram_tree[i] = oram_init(blk_size, 1 << i, 1 << (depth - 1 - i), path_buf, data, data_len);
 	}
 	return range_oram;
 }

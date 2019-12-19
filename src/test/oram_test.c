@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	const int blk_size = 4;
 	const int group_size = 1;
 	const int group_count = 16;
-	struct oram *const oram = oram_init(blk_size, group_size, group_count, argv[1], NULL);
+	struct oram *const oram = oram_init(blk_size, group_size, group_count, argv[1], NULL, 0);
 	uint8_t buf[16];
 	for (int i = 0; i < 16; i++) {
 		buf[i] = (uint8_t)rand();
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	}
 	printf("The prepopulating data of %d bytes is:\n", blk_size * group_count);
 	hex_dump(data, blk_size * group_count);
-	struct range_oram *range_oram = range_oram_init(blk_size, group_count, argv[1], data);
+	struct range_oram *range_oram = range_oram_init(blk_size, group_count, argv[1], data, blk_size * group_count);
 	uint8_t buf3[10];
 	for (int i = 1; i < 10; i++) {
 		range_oram_access(range_oram, 3, i, READ, buf3);

@@ -21,10 +21,11 @@ To run examples of single and range oram.
 
 ```bash
 ./run.sh
+python3 analysis.py
 ```
 This runs a large collection of examples. It'de be best to call `make clean` before calling `./run.sh`.
 
-The log files will be placed in `log/`.
+The log files will be placed in `log/`. The analysis plots will be placed in the project root directory.
 
 ## Clean
 

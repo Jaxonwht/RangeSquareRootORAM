@@ -13,17 +13,16 @@
  * @param num_accesses: total number of block accesses.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks accessed in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand(const char *file_name, int num_access, int range, int max_len, int blk_size)
+int generate_rand(const char *file_name, int num_access, int range, int max_len)
 {
 	const char WRITE_STR[] = "write";
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	for (int i = 0; i < num_access; i++) {
 		const int size = get_rand(1, max_len + 1);
 		const int offset = get_rand(0, range - size + 1);
@@ -51,16 +50,15 @@ int generate_rand(const char *file_name, int num_access, int range, int max_len,
  * @param num_read: total number of block reads.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks read in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand_read(const char *file_name, int num_read, int range, int max_len, int blk_size)
+int generate_rand_read(const char *file_name, int num_read, int range, int max_len)
 {
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	for (int i = 0; i < num_read; i++) {
 		const int size = get_rand(1, max_len + 1);
 		const int offset = get_rand(0, range - size + 1);
@@ -77,16 +75,15 @@ int generate_rand_read(const char *file_name, int num_read, int range, int max_l
  * @param num_write: total number of block writes.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks written in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_rand_write(const char *file_name, int num_write, int range, int max_len, int blk_size)
+int generate_rand_write(const char *file_name, int num_write, int range, int max_len)
 {
 	const char WRITE_STR[] = "write";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	for (int i = 0; i < num_write; i++) {
 		const int size = get_rand(1, max_len + 1);
 		const int offset = get_rand(0, range - size + 1);
@@ -110,17 +107,16 @@ int generate_rand_write(const char *file_name, int num_write, int range, int max
  * @param file_name: file name of the instruction file.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks accessed in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq(const char *file_name, int range, int max_len, int blk_size)
+int generate_seq(const char *file_name, int range, int max_len)
 {
 	const char WRITE_STR[] = "write";
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	int idx = 0;
 	while (idx < range) {
 		const int size = get_rand(1, max_len + 1);
@@ -153,16 +149,15 @@ int generate_seq(const char *file_name, int range, int max_len, int blk_size)
  * @param file_name: file name of the instruction file.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks read in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq_read(const char *file_name, int range, int max_len, int blk_size)
+int generate_seq_read(const char *file_name, int range, int max_len)
 {
 	const char READ_STR[] = "read";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	int idx = 0;
 	while (idx < range) {
 		const int size = get_rand(1, max_len + 1);
@@ -184,16 +179,15 @@ int generate_seq_read(const char *file_name, int range, int max_len, int blk_siz
  * @param file_name: file name of the instruction file.
  * @param range: total number of blocks n, the blocks are numbered 0 to n-1.
  * @param max_len: maximum number of contiguous blocks written in a single instruction.
- * @param blk_size: block size of the oram.
  *
  * @return 0 on success.
  * @return -1 on failure.
  */
-int generate_seq_write(const char *file_name, int range, int max_len, int blk_size)
+int generate_seq_write(const char *file_name, int range, int max_len)
 {
 	const char WRITE_STR[] = "write";
 	FILE *const fp = fopen(file_name, "w");
-	fprintf(fp, "block size %d, block count %d\n", blk_size, range);
+	fprintf(fp, "block count %d\n", range);
 	int idx = 0;
 	while (idx < range) {
 		const int size = get_rand(1, max_len + 1);
@@ -220,13 +214,12 @@ int generate_seq_write(const char *file_name, int range, int max_len, int blk_si
  * Generate an array of instructions from file.
  *
  * @param file_name: file name of the instruction file.
- * @param blk_size: store the block size used by the instruction file.
  * @param blk_count: store the total range of blocks accessed.
  *
  * @return a struct instruction * on success.
  * @return NULL on failure.
  */
-struct instruction *parse_instruction(const char *file_name, int *blk_size, int *blk_count)
+struct instruction *parse_instruction(const char *file_name, int *blk_count)
 {
 	const char WRITE_STR[] = "write";
 	const char READ_STR[] = "read";
@@ -238,7 +231,7 @@ struct instruction *parse_instruction(const char *file_name, int *blk_size, int 
 	char op_buf[WRITE_STR_LEN + 1];
 	int idx;
 	int size;
-	fscanf(fp, "block size %d, block count %d\n", blk_size, blk_count);
+	fscanf(fp, "block count %d\n", blk_count);
 	while (fscanf(fp, "%s %d %d\n", op_buf, &idx, &size) == 3) {
 		iter->next = malloc(sizeof(*iter));
 		iter = iter->next;

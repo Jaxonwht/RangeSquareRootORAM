@@ -14,16 +14,15 @@
  */
 int main(int argc, char *argv[])
 {
-	if (argc != 3 && argc != 9) {
+	if (argc != 3 && argc != 8) {
 		printf("Call the binary as ./instruction_gen_parse parse filename\n");
-		printf("Or... ./instruction_gen_parse generate <num_access> <blk_size> <blk_count> <max_range> <r | w | rw> <rand | seq> filename\n");
+		printf("Or... ./instruction_gen_parse generate <num_access> <blk_count> <max_range> <r | w | rw> <rand | seq> filename\n");
 		return 1;
 	}
 	if (!strcmp(argv[1], "parse")) {
-		int blk_size;
 		int blk_count;
-		struct instruction *instruct_arr = parse_instruction(argv[2], &blk_size, &blk_count);
-		printf("block size is %d bytes, block count is %d\n", blk_size, blk_count);
+		struct instruction *instruct_arr = parse_instruction(argv[2], &blk_count);
+		printf("block count is %d\n", blk_count);
 		struct instruction *instruct = instruct_arr;
 		while (instruct != NULL) {
 			printf("op is %s, idx is %d, size is %d\n", instruct->op == READ ? "read" : "write", instruct->idx, instruct->size);
@@ -34,40 +33,38 @@ int main(int argc, char *argv[])
 	}
 	if (!strcmp(argv[1], "generate")) {
 		int num_access;
-		int blk_size;
 		int blk_count;
 		int max_range;
 		sscanf(argv[2], "%d", &num_access);
-		sscanf(argv[3], "%d", &blk_size);
-		sscanf(argv[4], "%d", &blk_count);
-		sscanf(argv[5], "%d", &max_range);
-		if (!strcmp(argv[6], "rw")) {
-			if (!strcmp(argv[7], "rand")) {
-				generate_rand(argv[8], num_access, blk_count, max_range, blk_size);
+		sscanf(argv[3], "%d", &blk_count);
+		sscanf(argv[4], "%d", &max_range);
+		if (!strcmp(argv[5], "rw")) {
+			if (!strcmp(argv[6], "rand")) {
+				generate_rand(argv[7], num_access, blk_count, max_range);
 				return 0;
 			}
-			if (!strcmp(argv[7], "seq")) {
-				generate_seq(argv[8], blk_count, max_range, blk_size);
-				return 0;
-			}
-		}
-		if (!strcmp(argv[6], "r")) {
-			if (!strcmp(argv[7], "rand")) {
-				generate_rand_read(argv[8], num_access, blk_count, max_range, blk_size);
-				return 0;
-			}
-			if (!strcmp(argv[7], "seq")) {
-				generate_seq_read(argv[8], blk_count, max_range, blk_size);
+			if (!strcmp(argv[6], "seq")) {
+				generate_seq(argv[7], blk_count, max_range);
 				return 0;
 			}
 		}
-		if (!strcmp(argv[6], "w")) {
-			if (!strcmp(argv[7], "rand")) {
-				generate_rand_write(argv[8], num_access, blk_count, max_range, blk_size);
+		if (!strcmp(argv[5], "r")) {
+			if (!strcmp(argv[6], "rand")) {
+				generate_rand_read(argv[7], num_access, blk_count, max_range);
 				return 0;
 			}
-			if (!strcmp(argv[7], "seq")) {
-				generate_seq_write(argv[8], blk_count, max_range, blk_size);
+			if (!strcmp(argv[6], "seq")) {
+				generate_seq_read(argv[7], blk_count, max_range);
+				return 0;
+			}
+		}
+		if (!strcmp(argv[5], "w")) {
+			if (!strcmp(argv[6], "rand")) {
+				generate_rand_write(argv[7], num_access, blk_count, max_range);
+				return 0;
+			}
+			if (!strcmp(argv[6], "seq")) {
+				generate_seq_write(argv[7], blk_count, max_range);
 				return 0;
 			}
 		}
